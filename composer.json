@@ -1,0 +1,41 @@
+{
+    "name": "mmikkel/cache-flag",
+    "description": "Cold template caches that can be flagged and automatically cleared.",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "cache flag"
+    ],
+    "support": {
+        "docs": "https://github.com/mmikkel/CacheFlag-Craft3/blob/master/README.md",
+        "issues": "https://github.com/mmikkel/CacheFlag-Craft3/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mats Mikkel Rummelhoff",
+            "homepage": "https://vaersaagod.no"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0-RC1"
+    },
+    "autoload": {
+        "psr-4": {
+          "mmikkel\\cacheflag\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Cache Flag",
+        "handle": "cache-flag",
+        "hasCpSettings": false,
+        "hasCpSection": true,
+        "changelogUrl": "https://raw.githubusercontent.com/mmikkel/CacheFlag-Craft3/master/CHANGELOG.md",
+        "components": {},
+        "class": "mmikkel\\cacheflag\\CacheFlag"
+    }
+}
