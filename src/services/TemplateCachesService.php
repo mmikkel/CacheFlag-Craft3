@@ -114,10 +114,8 @@ class TemplateCachesService extends Component
 
     /**
      * Starts a new template cache.
-     *
-     * @param string $key The template cache key.
      */
-    public function startTemplateCache(string $key)
+    public function startTemplateCache()
     {
         return;
     }

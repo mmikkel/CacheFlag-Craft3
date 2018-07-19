@@ -102,7 +102,7 @@ class CacheFlagService extends Component
         ];
 
         if (Craft::$app->getEdition() === 1) {
-            $targets['userGroups'] = [
+            $sources['userGroups'] = [
                 'column' => 'userGroupId',
                 'name' => Craft::t('app', 'User Groups'),
                 'sources' => Craft::$app->getUserGroups()->getAllGroups(),
@@ -362,7 +362,7 @@ class CacheFlagService extends Component
     protected function deleteCaches(array $rows): bool
     {
 
-        if (!$rows) {
+        if (empty($rows)) {
             return true;
         }
 

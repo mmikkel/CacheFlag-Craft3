@@ -1,3 +1,5 @@
+/** global: Craft */
+
 $(function () {
 
     var $form = $('.cacheFlag-form');
@@ -56,7 +58,7 @@ $(function () {
                 }
             },
             complete: function () {
-                delete $submitRequest;
+                $submitRequest = null;
                 $form.removeClass('js-submitting');
                 $form.find('.spinner').addClass('hidden');
                 $form.find('input[type="submit"]').prop('disabled', false).removeClass('disabled');
@@ -66,6 +68,7 @@ $(function () {
     }
 
     function clearCaches(e) {
+
         e.preventDefault();
 
         var actionUrl = Craft.getActionUrl('cache-flag/default/delete-flagged-caches-by-flags'),
@@ -73,7 +76,7 @@ $(function () {
             flags = $target.data('clearflags');
 
         if ($target.hasClass('disabled') || !flags || flags == '') {
-            return false;
+            return;
         }
 
         var data = {

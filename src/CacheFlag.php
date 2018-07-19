@@ -104,7 +104,9 @@ class CacheFlag extends Plugin
             Elements::class,
             Elements::EVENT_AFTER_SAVE_ELEMENT,
             function (ElementEvent $event) {
-                CacheFlag::$plugin->cacheFlag->deleteFlaggedCachesByElement($event->element);
+                if ($event->element) {
+                    CacheFlag::$plugin->cacheFlag->deleteFlaggedCachesByElement($event->element);
+                }
             }
         );
 
@@ -112,7 +114,9 @@ class CacheFlag extends Plugin
             Elements::class,
             Elements::EVENT_BEFORE_DELETE_ELEMENT,
             function (ElementEvent $event) {
-                CacheFlag::$plugin->cacheFlag->deleteFlaggedCachesByElement($event->element);
+                if ($event->element) {
+                    CacheFlag::$plugin->cacheFlag->deleteFlaggedCachesByElement($event->element);
+                }
             }
         );
 
@@ -120,7 +124,9 @@ class CacheFlag extends Plugin
             Structures::class,
             Structures::EVENT_AFTER_MOVE_ELEMENT,
             function (MoveElementEvent $event) {
-                CacheFlag::$plugin->cacheFlag->deleteFlaggedCachesByElement($event->element);
+                if ($event->element) {
+                    CacheFlag::$plugin->cacheFlag->deleteFlaggedCachesByElement($event->element);
+                }
             }
         );
 
@@ -128,6 +134,13 @@ class CacheFlag extends Plugin
             Elements::class,
             Elements::EVENT_AFTER_PERFORM_ACTION,
             function (ElementActionEvent $event) {
+
+                /* @var ElementQueryInterface|null $criteria */
+                $criteria = $event->criteria;
+
+                if (!$criteria) {
+                    return;
+                }
 
                 /* @var ElementActionInterface|null $action */
                 $action = $event->action;
@@ -138,8 +151,7 @@ class CacheFlag extends Plugin
                     return;
                 }
 
-                /* @var ElementQueryInterface|null $criteria */
-                $elements = $event->criteria->all();
+                $elements = $criteria->all();
 
                 foreach ($elements as $element) {
                     CacheFlag::$plugin->cacheFlag->deleteFlaggedCachesByElement($element);

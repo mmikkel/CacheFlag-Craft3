@@ -53,7 +53,7 @@ class Extension extends \Twig_Extension
     }
 
     /**
-     * @param null $value
+     * @param string|null $value
      *
      * @return string
      */
