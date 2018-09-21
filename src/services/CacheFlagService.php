@@ -377,7 +377,7 @@ class CacheFlagService extends Component
 
         foreach ($flagsArray as $item) {
             if (\is_array($item)) {
-                $flags .= "{$this->implodeFlagsArray($item, ',')},";
+                $flags .= "{$this->implodeFlagsArray($item)},";
             } else {
                 $flags .= \preg_replace('/\s+/', '', $item) . ',';
             }
