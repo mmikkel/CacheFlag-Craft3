@@ -237,8 +237,14 @@ class CacheFlagService extends Component
             }, $flags);
         }
 
+        $dbDriver = Craft::$app->getDb()->getDriverName();
+
         foreach ($flags as $flag) {
-            $query->orWhere('FIND_IN_SET("' . $flag . '",flags)');
+            if ($dbDriver === 'pgsql') {
+                $query->orWhere("'{$flag}' = ANY(string_to_array(flags, ','))");
+            } else {
+                $query->orWhere('FIND_IN_SET("' . $flag . '",flags)');
+            }
         }
 
         return !!$query->scalar();
@@ -329,20 +335,26 @@ class CacheFlagService extends Component
             return false;
         }
 
-        if (!\is_array($flags)) {
-            $flags = \explode(',', \preg_replace('/\s+/', '', $flags));
+        if (\is_array($flags)) {
+            $flags = $this->implodeFlagsArray($flags);
         } else {
-            $flags = \array_map(function ($flag) {
-                return \preg_replace('/\s+/', '', $flag);
-            }, $flags);
+            $flags = \preg_replace('/\s+/', '', $flags);
         }
+
+        $flags = \array_values(\array_unique(\array_filter(\explode(',', $flags))));
 
         $query = (new Query())
             ->select(['cacheId', 'flags'])
             ->from([Flagged::tableName()]);
 
+        $dbDriver = Craft::$app->getDb()->getDriverName();
+
         foreach ($flags as $flag) {
-            $query->orWhere('FIND_IN_SET("' . $flag . '",flags)');
+            if ($dbDriver === 'pgsql') {
+                $query->orWhere("'{$flag}' = ANY(string_to_array(flags, ','))");
+            } else {
+                $query->orWhere('FIND_IN_SET("' . $flag . '",flags)');
+            }
         }
 
         $rows = $query->all();
@@ -354,6 +366,27 @@ class CacheFlagService extends Component
     /*
      * Protected methods
      */
+    /**
+     * @param array $flagsArray
+     * @return string
+     */
+    protected function implodeFlagsArray(array $flagsArray): string
+    {
+
+        $flags = '';
+
+        foreach ($flagsArray as $item) {
+            if (\is_array($item)) {
+                $flags .= "{$this->implodeFlagsArray($item, ',')},";
+            } else {
+                $flags .= \preg_replace('/\s+/', '', $item) . ',';
+            }
+        }
+
+        $flags = \substr($flags, 0, 0 - strlen(','));
+
+        return $flags;
+    }
 
     /**
      * @param array $rows

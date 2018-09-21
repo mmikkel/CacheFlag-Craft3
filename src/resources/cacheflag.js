@@ -35,13 +35,13 @@ $(function () {
                         var $input = $(this);
                         var source = $input.attr('name').replace('cacheflags[', '').replace(']', '').split(':');
                         var sourceColumn = source[0] || null;
-                        var sourceValue = source[1] || null;
+                        var sourceValue = (source[1] || '').toString();
                         if (!sourceColumn || !sourceValue) {
                             return;
                         }
                         var flags = '';
                         for (var i = 0; i < response.flags.length; ++i) {
-                            if ((response.flags[i][sourceColumn] || null) === sourceValue) {
+                            if ((response.flags[i][sourceColumn] || '').toString() === sourceValue) {
                                 flags = response.flags[i].flags || '';
                                 break;
                             }
