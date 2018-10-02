@@ -1,5 +1,9 @@
 # Cache Flag Changelog
 
+## 1.0.3 - 2018-10-03
+### Fixed
+- Fixes an issue where it was impossible to save multiple flags in environments running PHP 7.2
+
 ## 1.0.2 - 2018-09-21
 ### Fixed
 - Fixes breaking SQL issues on installs running PostgreSQL (#1)

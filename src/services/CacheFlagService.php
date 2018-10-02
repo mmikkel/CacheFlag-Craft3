@@ -124,7 +124,7 @@ class CacheFlagService extends Component
     }
 
     /**
-     * @param $flags
+     * @param string|array $flags
      * @param string $sourceColumn
      * @param string $sourceId
      * @throws \Throwable
@@ -156,13 +156,9 @@ class CacheFlagService extends Component
                 Craft::$app->getDb()->createCommand()
                     ->update(
                         Flags::tableName(),
-                        [
-                            'flags' => $flags,
-                        ],
-                        [
-                            $sourceColumn => $sourceId,
-                        ],
-                        null,
+                        ['flags' => $flags],
+                        "id=:id",
+                        [':id' => $flagsId],
                         false
                     )
                     ->execute();
