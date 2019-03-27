@@ -317,14 +317,20 @@ class CacheFlagService extends Component
 
         $flags = \array_unique($query->column());
 
-        return $this->deleteFlaggedCachesByFlags($flags);
+        // Add dynamic flags from element
+        $flags[] = "id-".$element->id;
+        $flags[] = "slug-".$element->slug;
+        $flags[] = "section-".$element->sectionId;
+
+        return $this->deleteFlaggedCachesByFlags($flags, $element->siteId);
     }
 
     /**
      * @param $flags
+     * @param $siteId
      * @return bool
      */
-    public function deleteFlaggedCachesByFlags($flags): bool
+    public function deleteFlaggedCachesByFlags($flags, $siteId=null): bool
     {
 
         if (!$flags) {
@@ -339,19 +345,43 @@ class CacheFlagService extends Component
 
         $flags = \array_values(\array_unique(\array_filter(\explode(',', $flags))));
 
+        $where = [];
+        $orWhere = ['or'];
+
         $query = (new Query())
             ->select(['cacheId', 'flags'])
             ->from([Flagged::tableName()]);
 
+        if($siteId)
+        {
+            $where[] = ['=', 'siteId', $siteId];
+        }
+
         $dbDriver = Craft::$app->getDb()->getDriverName();
 
-        foreach ($flags as $flag) {
+        foreach ($flags as $flag)
+        {
             if ($dbDriver === 'pgsql') {
-                $query->orWhere("'{$flag}' = ANY(string_to_array(flags, ','))");
+                //$query->orWhere("'{$flag}' = ANY(string_to_array(flags, ','))");
+                $orWhere[] = "'{$flag}' = ANY(string_to_array(flags, ','))";
             } else {
-                $query->orWhere('FIND_IN_SET("' . $flag . '",flags)');
+                //$query->orWhere('FIND_IN_SET("' . $flag . '",flags)');
+                $orWhere[] = "FIND_IN_SET('" . $flag . "',flags)";
             }
         }
+
+        if(count($orWhere) > 1)
+        {
+            $where[] = $orWhere;
+        }
+
+        if(count($where) > 0)
+        {
+            $query->where(array_merge(['and'], $where));
+        }
+
+        //print_r($query->getRawSql());
+        //exit;
 
         $rows = $query->all();
 

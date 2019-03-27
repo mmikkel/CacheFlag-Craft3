@@ -75,14 +75,14 @@ class TemplateCachesService extends Component
             ->where([
                 'and',
                 [
-                    'cacheKey' => $key,
-                    'siteId' => Craft::$app->getSites()->getCurrentSite()->id
+                    'templatecaches.cacheKey' => $key,
+                    'templatecaches.siteId' => Craft::$app->getSites()->getCurrentSite()->id
                 ],
-                ['>', 'expiryDate', Db::prepareDateForDb(new \DateTime())],
+                ['>', 'templatecaches.expiryDate', Db::prepareDateForDb(new \DateTime())],
             ]);
         if (!$global) {
             $query->andWhere([
-                'path' => $this->_getPath()
+                'templatecaches.path' => $this->_getPath()
             ]);
         }
         if ($flags) {
@@ -209,6 +209,7 @@ class TemplateCachesService extends Component
                         Flagged::tableName(),
                         [
                             'cacheId' => $cacheId,
+                            'siteId' => Craft::$app->getSites()->getCurrentSite()->id,
                             'flags' => $flags
                         ],
                         false
