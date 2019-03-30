@@ -268,7 +268,6 @@ class CacheFlagService extends Component
      */
     public function deleteFlaggedCachesByElement(Element $element): bool
     {
-
         // Collect all flags for this element
         $query = (new Query())
             ->select(['flags'])
@@ -318,11 +317,19 @@ class CacheFlagService extends Component
         $flags = \array_unique($query->column());
 
         // Add dynamic flags from element
-        $flags[] = "id-".$element->id;
-        $flags[] = "slug-".$element->slug;
-        $flags[] = "section-".$element->sectionId;
+        if(isset($element->id)) 
+            $flags[] = "id-".$element->id;
+        
+        if(isset($element->slug)) 
+            $flags[] = "slug-".$element->slug;
+        
+        if(isset($element->sectionId)) 
+            $flags[] = "sectionId-".$element->sectionId;
 
-        return $this->deleteFlaggedCachesByFlags($flags, $element->siteId);
+        // Does element belong to a specific Site?
+        $siteId = (isset($element->siteId)) ? $element->siteId : null;
+
+        return $this->deleteFlaggedCachesByFlags($flags, $siteId);
     }
 
     /**
@@ -332,7 +339,6 @@ class CacheFlagService extends Component
      */
     public function deleteFlaggedCachesByFlags($flags, $siteId=null): bool
     {
-
         if (!$flags) {
             return false;
         }
@@ -359,8 +365,8 @@ class CacheFlagService extends Component
 
         $dbDriver = Craft::$app->getDb()->getDriverName();
 
-        foreach ($flags as $flag)
-        {
+        foreach ($flags as $flag) {
+
             if ($dbDriver === 'pgsql') {
                 //$query->orWhere("'{$flag}' = ANY(string_to_array(flags, ','))");
                 $orWhere[] = "'{$flag}' = ANY(string_to_array(flags, ','))";
@@ -380,13 +386,9 @@ class CacheFlagService extends Component
             $query->where(array_merge(['and'], $where));
         }
 
-        //print_r($query->getRawSql());
-        //exit;
-
         $rows = $query->all();
 
         return $this->deleteCaches($rows);
-
     }
 
     /*
@@ -398,7 +400,6 @@ class CacheFlagService extends Component
      */
     protected function implodeFlagsArray(array $flagsArray): string
     {
-
         $flags = '';
 
         foreach ($flagsArray as $item) {
@@ -420,7 +421,6 @@ class CacheFlagService extends Component
      */
     protected function deleteCaches(array $rows): bool
     {
-
         if (empty($rows)) {
             return true;
         }
@@ -454,6 +454,5 @@ class CacheFlagService extends Component
         }
 
         return $success;
-
     }
 }
