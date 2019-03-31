@@ -52,15 +52,15 @@ Cache Flag supports clearing caches in two ways. Clearing flags on a global leve
 
 ### Element level
 
-Whenever an element in Craft is saved, updated and/or deleted Cache Flag automatically tries to clear these specific flags. `element-ELEMENT_ID`, `sectionId-SECTION_ID` and `slug-ELEMENT_SLUG` depening on if the element itself supports these properties (not all elements are within a section for example). This is really great if you only want to target a specific cached template for a single entry. For example:
+Whenever an element in Craft is saved, updated and/or deleted Cache Flag automatically tries to clear these specific flags. `id-{id}`, `sectionId-{sectionId}` and `slug-{slug}` depending on if the element itself supports these properties (not all elements are within a section for example). This is really great if you only want to target a specific cached template for a single entry. For example:
 
 ```twig
-{% cacheflag flagged "element-" ~ entry.id %}
+{% cacheflag flagged "id-" ~ entry.id %}
     {{ entry.title }}
 {% endcacheflag %}
 ```
 
-When your entry "123" is updated and/or edited in Craft Cache Flag will try to clear the flag `element-123` - and when doing so just clear the specific cache for just that entry without clearing any other caches.
+When entry "123" is updated and/or edited in Craft Cache Flag will try to clear the flag `id-123` - and when doing so just clear the specific cache for just that entry without clearing any other caches.
 
 ### Global level
 
@@ -86,7 +86,7 @@ Suppose you also want to have the above cache cleared whenever a Category in a p
 
 ### Mixing global and element levels
 
-You can of course combine these two to make some really advanced setups when clearing your template caches. Let's say you have a section called "Wicked Entries" and while clearing a specific template for the entries in this section (using `element-ELEMENT_ID`) you also want to make sure your homepage is cleared as well because maybe you are displaying the 5 latest _wicked entries_ somewhere and you want to make sure that if someone edits one of the top 5 entries the homepage also updates. Just add the flag `homepage` to your "Wicked Entries" section in Cache Flag's CP section and when an entry within the section is edited Cache Flag will not only clear the automatically set flag `element-ELEMENT_ID` but also merge in the `homepage` flag and clear its related cache(s) as well. Be creative!
+You can of course combine these two to make some really advanced setups when clearing your template caches. Let's say you have a section called "Wicked Entries" and while clearing a specific template for the entries in this section (using `id-{id}`) you also want to make sure your homepage is cleared as well because maybe you are displaying the 5 latest _wicked entries_ somewhere and you want to make sure that if someone edits one of the top 5 entries the homepage also updates. Just add the flag `homepage` to your "Wicked Entries" section in Cache Flag's CP section and when an entry within the section is edited Cache Flag will not only clear the automatically set flag `id-{id}` but also merge in the `homepage` flag and clear its related cache(s) as well. Be creative!
 
 Beyond the `flagged` parameter, the `{% cacheflag %}` tag _supports all the same parameters_ as the native `{% cache %}` tag – so I'll just refer to [the official documentation for the latter](https://docs.craftcms.com/v3/dev/tags/cache.html#app).
 
