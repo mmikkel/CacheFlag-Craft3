@@ -2,7 +2,7 @@
 
 Cache Flag adds a new `{% cacheflag %}` Twig tag to Craft CMS, which works just like the native `{% cache %}` tag, except that _it will not save element queries for automatic cache breaking_. This offers an alternate way to automatically clear your caches, without any scaling or performance issues. With your entries count growing the native `{% cache %}` tag can really bog down your system and sometimes even fail.
 
-![Screenshot](resources/flag.png)
+![Screenshot](src/resources/flag.png)
 
 ## Contents
 
