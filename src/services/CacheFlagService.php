@@ -259,7 +259,7 @@ class CacheFlagService extends Component
         if (!$cacheIds) {
             return true;
         }
-        return Craft::$app->getTemplateCaches()->deleteCacheById($cacheIds);
+        return CacheFlag::getInstance()->templateCaches->deleteCacheById($cacheIds);
     }
 
     /**
@@ -413,7 +413,7 @@ class CacheFlagService extends Component
             ]));
         }
 
-        $success = Craft::$app->getTemplateCaches()->deleteCacheById($cacheIds);
+        $success = !!CacheFlag::getInstance()->templateCaches->deleteCacheById($cacheIds);
 
         // Fire a 'afterDeleteFlaggedCaches' event
         if ($success && $this->hasEventHandlers(self::EVENT_AFTER_DELETE_FLAGGED_CACHES)) {

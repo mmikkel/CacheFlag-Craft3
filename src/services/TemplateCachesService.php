@@ -8,6 +8,7 @@
 
 namespace mmikkel\cacheflag\services;
 
+use craft\db\Table;
 use mmikkel\cacheflag\CacheFlag;
 use mmikkel\cacheflag\records\Flagged;
 
@@ -23,6 +24,7 @@ use craft\helpers\StringHelper;
 use craft\services\TemplateCaches;
 use craft\queue\jobs\DeleteStaleTemplateCaches;
 use DateTime;
+
 use yii\base\Component;
 use yii\base\Event;
 use yii\web\Response;
@@ -86,7 +88,7 @@ class TemplateCachesService extends Component
             ]);
         }
         if ($flags) {
-            
+
             // Sanitize flags
             if (\is_array($flags)) {
                 $flags = \implode(',', \array_map(function ($flag) {
@@ -222,6 +224,39 @@ class TemplateCachesService extends Component
 
             throw $e;
         }
+    }
+
+    /**
+     * Deletes a cache by its ID(s).
+     *
+     * @param int|int[] $cacheId The cache ID(s)
+     * @return bool
+     */
+    public function deleteCacheById($cacheId): bool
+    {
+        if (is_array($cacheId) && empty($cacheId)) {
+            return false;
+        }
+
+        // Fire a 'beforeDeleteCaches' event
+        if (Craft::$app->getTemplateCaches()->hasEventHandlers(TemplateCaches::EVENT_BEFORE_DELETE_CACHES)) {
+            Craft::$app->getTemplateCaches()->trigger(TemplateCaches::EVENT_BEFORE_DELETE_CACHES, new DeleteTemplateCachesEvent([
+                'cacheIds' => (array)$cacheId
+            ]));
+        }
+
+        $affectedRows = Craft::$app->getDb()->createCommand()
+            ->delete(Table::TEMPLATECACHES, ['id' => $cacheId])
+            ->execute();
+
+        // Fire an 'afterDeleteCaches' event
+        if ($affectedRows && Craft::$app->getTemplateCaches()->hasEventHandlers(TemplateCaches::EVENT_AFTER_DELETE_CACHES)) {
+            Craft::$app->getTemplateCaches()->trigger(TemplateCaches::EVENT_AFTER_DELETE_CACHES, new DeleteTemplateCachesEvent([
+                'cacheIds' => (array)$cacheId
+            ]));
+        }
+
+        return (bool)$affectedRows;
     }
 
     // Private Methods
