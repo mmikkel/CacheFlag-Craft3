@@ -1,5 +1,9 @@
 # Cache Flag Changelog
 
+## 1.0.4 - 2019-07-16
+### Fixed
+- Fixes an issue where Cache Flag was unable to delete template caches on Craft 3.5.x
+
 ## 1.0.3 - 2018-10-03
 ### Fixed
 - Fixes an issue where it was impossible to save multiple flags in environments running PHP 7.2
