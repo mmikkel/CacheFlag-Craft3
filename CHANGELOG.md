@@ -1,6 +1,6 @@
 # Cache Flag Changelog
 
-## 1.0.4 - 2019-07-16
+## 1.0.4 - 2020-07-16
 ### Fixed
 - Fixes an issue where Cache Flag was unable to delete template caches on Craft 3.5.x
 
