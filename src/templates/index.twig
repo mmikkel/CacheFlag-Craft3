@@ -4,8 +4,8 @@
 {% set title = 'Flags'|t('cache-flag') %}
 {% set selectedTab = 'cacheFlagIndex' %}
 
-{% set sources = craft.cacheFlag.getSources() %}
-{% set allFlags = craft.cacheFlag.getAllFlags() %}
+{% set sources = craft.cacheFlagCp.getSources() %}
+{% set allFlags = craft.cacheFlagCp.getAllFlags() %}
 
 {% set content %}
 
@@ -70,8 +70,7 @@
                                 </td>
 
                                 <td scope="col" class="cacheFlag-flagsActions">
-                                    {% set flagHasCaches = sourceFlags and craft.cacheFlag.flagsHasCaches(sourceFlags) %}
-                                    <button class="btn submit{{ not flagHasCaches ? ' disabled' }}" data-clearflags="{{ sourceFlags }}">{{ 'Invalidate caches'|t('cache-flag') }}</button>
+                                    <button class="btn submit" data-clearflags="{{ sourceInputId }}">{{ 'Invalidate caches'|t('cache-flag') }}</button>
                                 </td>
 
                             </tr>

@@ -24,6 +24,7 @@ use craft\events\TemplateEvent;
 use craft\helpers\ElementHelper;
 use craft\services\Elements;
 use craft\services\Plugins;
+use craft\services\ProjectConfig;
 use craft\services\Structures;
 use craft\utilities\ClearCaches;
 use craft\web\UrlManager;
@@ -34,6 +35,7 @@ use yii\base\Event;
 use yii\base\InvalidConfigException;
 
 use mmikkel\cacheflag\services\CacheFlagService;
+use mmikkel\cacheflag\services\ProjectConfig as CacheFlagProjectConfigService;
 use mmikkel\cacheflag\services\TemplateCachesService;
 use mmikkel\cacheflag\twigextensions\Extension as CacheFlagTwigExtension;
 use mmikkel\cacheflag\variables\CpVariable;
@@ -45,8 +47,9 @@ use mmikkel\cacheflag\variables\CpVariable;
  * @package   CacheFlag
  * @since     1.0.0
  *
- * @property  CacheFlagService $cacheFlag
- * @property  TemplateCachesService $templateCaches
+ * @property CacheFlagService $cacheFlag
+ * @property CacheFlagProjectConfigService $projectConfig
+ * @property TemplateCachesService $templateCaches
  */
 class CacheFlag extends Plugin
 {
@@ -64,7 +67,7 @@ class CacheFlag extends Plugin
     /**
      * @var string
      */
-    public $schemaVersion = '1.1.0';
+    public $schemaVersion = '1.0.1';
 
     // Public Methods
     // =========================================================================
@@ -80,50 +83,14 @@ class CacheFlag extends Plugin
         // Register services
         $this->setComponents([
             'cacheFlag' => CacheFlagService::class,
+            'projectConfig' => CacheFlagProjectConfigService::class,
             'templateCaches' => TemplateCachesService::class,
         ]);
 
+        // Register custom Twig extension
         Craft::$app->getView()->registerTwigExtension(new CacheFlagTwigExtension());
 
-        $this->addElementEventListeners();
-
-        Event::on(ClearCaches::class, ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
-            static function (RegisterCacheOptionsEvent $event) {
-                $event->options[] = [
-                    'key' => 'cacheflag-flagged-caches',
-                    'label' => Craft::t('cache-flag', 'Flagged template caches'),
-                    'action' => [CacheFlag::getInstance()->cacheFlag, 'invalidateAllFlaggedCaches'],
-                    'info' => Craft::t('cache-flag', 'All template caches flagged using Cache Flag'),
-                ];
-            }
-        );
-
-        Event::on(
-            Plugins::class,
-            Plugins::EVENT_AFTER_LOAD_PLUGINS,
-            function () {
-                $this->maybeRegisterResources();
-            }
-        );
-
-        Craft::info(
-            Craft::t(
-                'cache-flag',
-                '{name} plugin loaded',
-                ['name' => $this->name]
-            ),
-            __METHOD__
-        );
-    }
-
-    // Protected Methods
-    // =========================================================================
-
-    /**
-     * Add event listeners for cache breaking
-     */
-    protected function addElementEventListeners()
-    {
+        // Invalidate flagged caches when elements are saved
         Event::on(
             Elements::class,
             Elements::EVENT_AFTER_SAVE_ELEMENT,
@@ -136,6 +103,7 @@ class CacheFlag extends Plugin
             }
         );
 
+        // Invalidate flagged caches when elements are deleted
         Event::on(
             Elements::class,
             Elements::EVENT_BEFORE_DELETE_ELEMENT,
@@ -148,6 +116,7 @@ class CacheFlag extends Plugin
             }
         );
 
+        // Invalidate flagged caches when structure entries are moved
         Event::on(
             Structures::class,
             Structures::EVENT_AFTER_MOVE_ELEMENT,
@@ -160,6 +129,7 @@ class CacheFlag extends Plugin
             }
         );
 
+        // Invalidate flagged caches when elements change status
         Event::on(
             Elements::class,
             Elements::EVENT_AFTER_PERFORM_ACTION,
@@ -192,19 +162,18 @@ class CacheFlag extends Plugin
                 }
             }
         );
-    }
 
-    /**
-     *  Maybe register CP assets bundle and variable
-     */
-    protected function maybeRegisterResources()
-    {
-
-        $request = Craft::$app->getRequest();
-
-        if (!Craft::$app->getUser() || !$request->getIsCpRequest() || $request->getIsConsoleRequest() || ($request->getSegments()[0] ?? null) !== 'cache-flag') {
-            return;
-        }
+        // Add option to the Clear Caches utility to invalidate all flagged caches
+        Event::on(ClearCaches::class, ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
+            static function (RegisterCacheOptionsEvent $event) {
+                $event->options[] = [
+                    'key' => 'cacheflag-flagged-caches',
+                    'label' => Craft::t('cache-flag', 'Flagged template caches'),
+                    'action' => [CacheFlag::getInstance()->cacheFlag, 'invalidateAllFlaggedCaches'],
+                    'info' => Craft::t('cache-flag', 'All template caches flagged using Cache Flag'),
+                ];
+            }
+        );
 
         // Register CP variable
         Event::on(
@@ -213,8 +182,40 @@ class CacheFlag extends Plugin
             function (Event $event) {
                 /** @var CraftVariable $variable */
                 $variable = $event->sender;
-                $variable->set('cacheFlag', CpVariable::class);
+                $variable->set('cacheFlagCp', CpVariable::class);
             }
+        );
+
+        // Support Project Config rebuild
+        Event::on(
+            ProjectConfig::class,
+            ProjectConfig::EVENT_REBUILD,
+            [$this->projectConfig, 'onProjectConfigRebuild']
+        );
+
+        Craft::$app->projectConfig
+            ->onAdd('cacheFlags.{uid}', [$this->projectConfig, 'onProjectConfigChange'])
+            ->onUpdate('cacheFlags.{uid}', [$this->projectConfig, 'onProjectConfigChange'])
+            ->onRemove('cacheFlags.{uid}', [$this->projectConfig, 'onProjectConfigDelete']);
+
+        // Flush the project config when the plugin is uninstalled
+        Event::on(
+            Plugins::class,
+            Plugins::EVENT_AFTER_UNINSTALL_PLUGIN,
+            function (PluginEvent $event) {
+                if ($event->plugin === $this) {
+                    Craft::$app->getProjectConfig()->remove('cacheFlags');
+                }
+            }
+        );
+
+        Craft::info(
+            Craft::t(
+                'cache-flag',
+                '{name} plugin loaded',
+                ['name' => $this->name]
+            ),
+            __METHOD__
         );
     }
 

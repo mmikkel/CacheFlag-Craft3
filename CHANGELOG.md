@@ -1,8 +1,17 @@
 # Cache Flag Changelog
 
-## 1.1.0 - 2020-07-21
+## Unreleased  
 
 > {warning} Craft 3.5.0 has a new template caching system with [a tag-based cache invalidation strategy](https://github.com/craftcms/cms/issues/1507#issuecomment-633147835), which solves the performance issues related to automatic cache busting using the native `{% cache %}` tag in previous Craft versions. **If you're currently using this plugin to circumvent said performance issues, you probably don't need Cache Flag anymore.**  That said, Cache Flag 1.1.0 is fully compatible with Craft 3.5 and is still a valid alternative to the native `{% cache %}` tag, e.g. for automatic bulk cache invalidation or completely "cold" template caches.  
+
+### Added  
+- Added support for Project Config  
+- Added Craft 2 migration  
+
+### Fixed  
+- The `{{%cacheflag_flags}}` database table now has missing audit columns (`dateCreated`, `dateUpdated` and `uid`)  
+
+## 1.1.0 - 2020-07-21
 
 ### Added  
 - Added the `with elements` directive to the `{% cacheflag %}` tag, which makes Cache Flag collect element tags for automatic cache invalidation (just like the native `{% cache %}` tag) in addition to your custom flags.  

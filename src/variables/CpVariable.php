@@ -10,9 +10,10 @@
 
 namespace mmikkel\cacheflag\variables;
 
-use mmikkel\cacheflag\CacheFlag;
-
 use Craft;
+use craft\helpers\UrlHelper;
+
+use mmikkel\cacheflag\CacheFlag;
 
 /**
  * @author    Mats Mikkel Rummelhoff
@@ -45,7 +46,16 @@ class CpVariable
      */
     public function getCpTabs(): array
     {
-        return CacheFlag::getInstance()->cacheFlag->getCpTabs();
+        return [
+            'cacheFlagIndex' => array(
+                'label' => Craft::t('cache-flag', 'Flags'),
+                'url' => UrlHelper::url('cache-flag'),
+            ),
+            'about' => array(
+                'label' => Craft::t('cache-flag', 'About'),
+                'url' => UrlHelper::url('cache-flag/about'),
+            ),
+        ];
     }
 
     /**
@@ -53,7 +63,48 @@ class CpVariable
      */
     public function getSources(): array
     {
-        return CacheFlag::getInstance()->cacheFlag->getSources();
+        $sources = [
+            'sections' => [
+                'column' => 'sectionId',
+                'name' => Craft::t('app', 'Sections'),
+                'sources' => Craft::$app->getSections()->getAllSections(),
+            ],
+            'categoryGroups' => [
+                'column' => 'categoryGroupId',
+                'name' => Craft::t('app', 'Category Groups'),
+                'sources' => Craft::$app->getCategories()->getAllGroups(),
+            ],
+            'volumes' => [
+                'column' => 'volumeId',
+                'name' => Craft::t('app', 'Asset Volumes'),
+                'sources' => Craft::$app->getVolumes()->getAllVolumes(),
+            ],
+            'globalSets' => [
+                'column' => 'globalSetId',
+                'name' => Craft::t('app', 'Global Sets'),
+                'sources' => Craft::$app->getGlobals()->getAllSets(),
+            ],
+            'elementTypes' => [
+                'column' => 'elementType',
+                'name' => Craft::t('app', 'Element Types'),
+                'sources' => \array_map(function (string $elementType) {
+                    return [
+                        'id' => $elementType,
+                        'name' => $elementType,
+                    ];
+                }, Craft::$app->getElements()->getAllElementTypes()),
+            ],
+        ];
+
+        if (Craft::$app->getEdition() === 1) {
+            $sources['userGroups'] = [
+                'column' => 'userGroupId',
+                'name' => Craft::t('app', 'User Groups'),
+                'sources' => Craft::$app->getUserGroups()->getAllGroups(),
+            ];
+        }
+
+        return $sources;
     }
 
     /**

@@ -73,14 +73,11 @@ $(function () {
 
         var actionUrl = Craft.getActionUrl('cache-flag/default/invalidate-flagged-caches-by-flags'),
             $target = $(e.currentTarget),
-            flags = $target.data('clearflags');
-
-        if ($target.hasClass('disabled') || !flags || flags == '') {
-            return;
-        }
+            flagsInputId = $target.data('clearflags'),
+            $flagsInput = $form.find('input[name="cacheflags[' + flagsInputId + ']"]');
 
         var data = {
-            flags: flags
+            flags: $flagsInput.val()
         };
 
         data[$form.data('csrf-name')] = $form.data('csrf-token');

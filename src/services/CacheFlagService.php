@@ -10,24 +10,28 @@
 
 namespace mmikkel\cacheflag\services;
 
+use Craft;
+use craft\base\Component;
 use craft\base\Element;
+use craft\db\Query;
+use craft\db\Table;
 use craft\elements\Asset;
 use craft\elements\Category;
 use craft\elements\Entry;
 use craft\elements\GlobalSet;
 use craft\elements\Tag;
+use craft\helpers\Db;
+use craft\helpers\StringHelper;
+use craft\helpers\UrlHelper;
+
+use yii\caching\TagDependency;
+
 use mmikkel\cacheflag\CacheFlag;
 use mmikkel\cacheflag\events\BeforeDeleteFlaggedTemplateCachesEvent;
 use mmikkel\cacheflag\events\AfterDeleteFlaggedTemplateCachesEvent;
 use mmikkel\cacheflag\events\FlaggedTemplateCachesEvent;
 use mmikkel\cacheflag\records\Flagged;
 use mmikkel\cacheflag\records\Flags;
-
-use Craft;
-use craft\base\Component;
-use craft\db\Query;
-use craft\helpers\UrlHelper;
-use yii\caching\TagDependency;
 
 
 /**
@@ -68,72 +72,6 @@ class CacheFlagService extends Component
     /**
      * @return array
      */
-    public function getCpTabs(): array
-    {
-        return [
-            'cacheFlagIndex' => array(
-                'label' => Craft::t('cache-flag', 'Flags'),
-                'url' => UrlHelper::url('cache-flag'),
-            ),
-            'about' => array(
-                'label' => Craft::t('cache-flag', 'About'),
-                'url' => UrlHelper::url('cache-flag/about'),
-            ),
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    public function getSources(): array
-    {
-        $sources = [
-            'sections' => [
-                'column' => 'sectionId',
-                'name' => Craft::t('app', 'Sections'),
-                'sources' => Craft::$app->getSections()->getAllSections(),
-            ],
-            'categoryGroups' => [
-                'column' => 'categoryGroupId',
-                'name' => Craft::t('app', 'Category Groups'),
-                'sources' => Craft::$app->getCategories()->getAllGroups(),
-            ],
-            'volumes' => [
-                'column' => 'volumeId',
-                'name' => Craft::t('app', 'Asset Volumes'),
-                'sources' => Craft::$app->getVolumes()->getAllVolumes(),
-            ],
-            'globalSets' => [
-                'column' => 'globalSetId',
-                'name' => Craft::t('app', 'Global Sets'),
-                'sources' => Craft::$app->getGlobals()->getAllSets(),
-            ],
-            'elementTypes' => [
-                'column' => 'elementType',
-                'name' => Craft::t('app', 'Element Types'),
-                'sources' => \array_map(function (string $elementType) {
-                    return [
-                        'id' => $elementType,
-                        'name' => $elementType,
-                    ];
-                }, Craft::$app->getElements()->getAllElementTypes()),
-            ],
-        ];
-
-        if (Craft::$app->getEdition() === 1) {
-            $sources['userGroups'] = [
-                'column' => 'userGroupId',
-                'name' => Craft::t('app', 'User Groups'),
-                'sources' => Craft::$app->getUserGroups()->getAllGroups(),
-            ];
-        }
-
-        return $sources;
-    }
-
-    /**
-     * @return array
-     */
     public function getAllFlags(): array
     {
         return (new Query())
@@ -143,13 +81,13 @@ class CacheFlagService extends Component
     }
 
     /**
-     * @param string|array $flags
+     * @param string|string[] $flags
      * @param string $sourceColumn
-     * @param string $sourceId
+     * @param string $sourceValue
      * @throws \Throwable
      * @throws \yii\db\Exception
      */
-    public function saveFlags($flags, string $sourceColumn, string $sourceId)
+    public function saveFlags($flags, string $sourceColumn, string $sourceValue)
     {
 
         if (!$flags) {
@@ -160,46 +98,61 @@ class CacheFlagService extends Component
             $flags = \implode(',', $flags);
         }
 
-        $transaction = Craft::$app->getDb()->beginTransaction();
+        $uid = (new Query())
+            ->select(['uid'])
+            ->from(Flags::tableName())
+            ->where([$sourceColumn => $sourceValue])
+            ->scalar();
 
-        try {
-
-            $flagsId = (int)(new Query())
-                ->select(['id'])
-                ->from([Flags::tableName()])
-                ->where([$sourceColumn => $sourceId])
-                ->scalar();
-
-            if ($flagsId) {
-
-                Craft::$app->getDb()->createCommand()
-                    ->update(
-                        Flags::tableName(),
-                        ['flags' => $flags],
-                        "id=:id",
-                        [':id' => $flagsId]
-                    )
-                    ->execute();
-
-            } else {
-
-                Craft::$app->getDb()->createCommand()
-                    ->insert(
-                        Flags::tableName(),
-                        [
-                            'flags' => $flags,
-                            $sourceColumn => $sourceId,
-                        ])
-                    ->execute();
-            }
-
-            $transaction->commit();
-
-        } catch (\Throwable $e) {
-            $transaction->rollBack();
-
-            throw $e;
+        $isNew = !$uid;
+        if ($isNew) {
+            $uid = StringHelper::UUID();
         }
+
+        $sourceKey = null;
+
+        switch ($sourceColumn) {
+            case 'sectionId':
+                $sourceKey = 'section';
+                $sourceValue = Db::uidById(Table::SECTIONS, $sourceValue);
+                break;
+            case 'categoryGroupId':
+                $sourceKey = 'categoryGroup';
+                $sourceValue = Db::uidById(Table::CATEGORYGROUPS, $sourceValue);
+                break;
+            case 'tagGroupId':
+                $sourceKey = 'tagGroup';
+                $sourceValue = Db::uidById(Table::TAGGROUPS, $sourceValue);
+                break;
+            case 'userGroupId':
+                $sourceKey = 'userGroup';
+                $sourceValue = Db::uidById(Table::USERGROUPS, $sourceValue);
+                break;
+            case 'volumeId':
+                $sourceKey = 'volume';
+                $sourceValue = Db::uidById(Table::VOLUMES, $sourceValue);
+                break;
+            case 'globalSetId':
+                $sourceKey = 'globalSet';
+                $sourceValue = Db::uidById(Table::GLOBALSETS, $sourceValue);
+                break;
+            case 'elementType':
+                $sourceKey = 'elementType';
+                break;
+            default:
+                return;
+        }
+
+        if (!$sourceValue) {
+            return;
+        }
+
+        // Save it to the project config
+        $path = "cacheFlags.{$uid}";
+        Craft::$app->projectConfig->set($path, [
+            'source' => "$sourceKey:$sourceValue",
+            'flags' => $flags,
+        ]);
     }
 
     /**
@@ -211,24 +164,19 @@ class CacheFlagService extends Component
     public function deleteFlagsBySource(string $sourceColumn, string $sourceValue)
     {
 
-        $transaction = Craft::$app->getDb()->beginTransaction();
+        $uid = (new Query())
+            ->select(['uid'])
+            ->from(Flags::tableName())
+            ->where([$sourceColumn => $sourceValue])
+            ->scalar();
 
-        try {
-
-            Craft::$app->getDb()->createCommand()
-                ->delete(
-                    Flags::tableName(),
-                    [$sourceColumn => $sourceValue]
-                )
-                ->execute();
-
-            $transaction->commit();
-
-        } catch (\Throwable $e) {
-            $transaction->rollBack();
-
-            throw $e;
+        if (!$uid) {
+            return false;
         }
+
+        // Remove it from the project config
+        $path = "cacheFlags.{$uid}";
+        Craft::$app->projectConfig->remove($path);
     }
 
     /**
