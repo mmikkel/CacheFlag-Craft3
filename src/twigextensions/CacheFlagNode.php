@@ -8,13 +8,19 @@
 
 namespace mmikkel\cacheflag\twigextensions;
 
-use Composer\Cache;
 use mmikkel\cacheflag\CacheFlag;
 
 use Craft;
 use craft\helpers\StringHelper;
 
-class CacheFlagNode extends \Twig_Node
+use Twig\Compiler;
+use Twig\Node\Node;
+
+/**
+ * Class CacheFlagNode
+ * @package mmikkel\cacheflag\twigextensions
+ */
+class CacheFlagNode extends Node
 {
 
     // Properties
@@ -31,11 +37,12 @@ class CacheFlagNode extends \Twig_Node
     /**
      * @inheritdoc
      */
-    public function compile(\Twig_Compiler $compiler)
+    public function compile(Compiler $compiler)
     {
         $n = self::$_cacheCount++;
 
         $flags = $this->hasNode('flags') ? $this->getNode('flags') : null;
+
         $conditions = $this->hasNode('conditions') ? $this->getNode('conditions') : null;
         $ignoreConditions = $this->hasNode('ignoreConditions') ? $this->getNode('ignoreConditions') : null;
         $key = $this->hasNode('key') ? $this->getNode('key') : null;
@@ -44,10 +51,11 @@ class CacheFlagNode extends \Twig_Node
         $durationNum = $this->getAttribute('durationNum');
         $durationUnit = $this->getAttribute('durationUnit');
         $global = $this->getAttribute('global') ? 'true' : 'false';
+        $elements = $this->getAttribute('elements') ? 'true' : 'false';
 
         $compiler
             ->addDebugInfo($this)
-            ->write('$cacheService = ' . CacheFlag::class . "::\$plugin->templateCaches;\n")
+            ->write('$cacheService = ' . CacheFlag::class . "::getInstance()->templateCaches;\n")
             ->write('$request = ' . Craft::class . "::\$app->getRequest();\n")
             ->write("\$ignoreCache{$n} = (\$request->getIsLivePreview() || \$request->getToken()");
 
@@ -86,7 +94,7 @@ class CacheFlagNode extends \Twig_Node
         }
 
         $compiler
-            ->raw(", {$global});\n")
+            ->raw(", {$elements}, {$global});\n")
             ->outdent()
             ->write("} else {\n")
             ->indent()

@@ -10,6 +10,11 @@ namespace mmikkel\cacheflag\events;
 
 use yii\base\Event;
 
+/**
+ * Class AfterDeleteFlaggedTemplateCachesEvent
+ * @package mmikkel\cacheflag\events
+ * @deprecated since 1.1.0
+ */
 class AfterDeleteFlaggedTemplateCachesEvent extends Event
 {
 

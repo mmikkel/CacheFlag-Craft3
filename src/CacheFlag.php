@@ -10,13 +10,8 @@
 
 namespace mmikkel\cacheflag;
 
-use mmikkel\cacheflag\assetbundles\CpBundle;
-use mmikkel\cacheflag\services\CacheFlagService;
-use mmikkel\cacheflag\services\TemplateCachesService;
-use mmikkel\cacheflag\twigextensions\Extension;
-use mmikkel\cacheflag\variables\CpVariable;
-
 use Craft;
+use craft\base\ElementInterface;
 use craft\base\Plugin;
 use craft\elements\actions\SetStatus;
 use craft\events\ElementEvent;
@@ -24,13 +19,24 @@ use craft\events\ElementActionEvent;
 use craft\events\MergeElementsEvent;
 use craft\events\MoveElementEvent;
 use craft\events\PluginEvent;
+use craft\events\RegisterCacheOptionsEvent;
+use craft\events\TemplateEvent;
+use craft\helpers\ElementHelper;
 use craft\services\Elements;
 use craft\services\Plugins;
 use craft\services\Structures;
+use craft\utilities\ClearCaches;
 use craft\web\UrlManager;
 use craft\web\twig\variables\CraftVariable;
+use craft\web\View;
 
 use yii\base\Event;
+use yii\base\InvalidConfigException;
+
+use mmikkel\cacheflag\services\CacheFlagService;
+use mmikkel\cacheflag\services\TemplateCachesService;
+use mmikkel\cacheflag\twigextensions\Extension as CacheFlagTwigExtension;
+use mmikkel\cacheflag\variables\CpVariable;
 
 /**
  * Class CacheFlag
@@ -77,10 +83,28 @@ class CacheFlag extends Plugin
             'templateCaches' => TemplateCachesService::class,
         ]);
 
-        Craft::$app->getView()->registerTwigExtension(new Extension());
+        Craft::$app->getView()->registerTwigExtension(new CacheFlagTwigExtension());
 
-        $this->addEventListeners();
-        $this->registerResources();
+        $this->addElementEventListeners();
+
+        Event::on(ClearCaches::class, ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
+            static function (RegisterCacheOptionsEvent $event) {
+                $event->options[] = [
+                    'key' => 'cacheflag-flagged-caches',
+                    'label' => Craft::t('cache-flag', 'Flagged template caches'),
+                    'action' => [CacheFlag::getInstance()->cacheFlag, 'invalidateAllFlaggedCaches'],
+                    'info' => Craft::t('cache-flag', 'All template caches flagged using Cache Flag'),
+                ];
+            }
+        );
+
+        Event::on(
+            Plugins::class,
+            Plugins::EVENT_AFTER_LOAD_PLUGINS,
+            function () {
+                $this->maybeRegisterResources();
+            }
+        );
 
         Craft::info(
             Craft::t(
@@ -98,15 +122,17 @@ class CacheFlag extends Plugin
     /**
      * Add event listeners for cache breaking
      */
-    protected function addEventListeners()
+    protected function addElementEventListeners()
     {
         Event::on(
             Elements::class,
             Elements::EVENT_AFTER_SAVE_ELEMENT,
             function (ElementEvent $event) {
-                if ($event->element) {
-                    CacheFlag::$plugin->cacheFlag->deleteFlaggedCachesByElement($event->element);
+                $element = $event->element;
+                if (!$element || ElementHelper::isDraftOrRevision($element)) {
+                    return;
                 }
+                CacheFlag::$plugin->cacheFlag->invalidateFlaggedCachesByElement($element);
             }
         );
 
@@ -114,9 +140,11 @@ class CacheFlag extends Plugin
             Elements::class,
             Elements::EVENT_BEFORE_DELETE_ELEMENT,
             function (ElementEvent $event) {
-                if ($event->element) {
-                    CacheFlag::$plugin->cacheFlag->deleteFlaggedCachesByElement($event->element);
+                $element = $event->element;
+                if (!$element || ElementHelper::isDraftOrRevision($element)) {
+                    return;
                 }
+                CacheFlag::$plugin->cacheFlag->invalidateFlaggedCachesByElement($element);
             }
         );
 
@@ -124,9 +152,11 @@ class CacheFlag extends Plugin
             Structures::class,
             Structures::EVENT_AFTER_MOVE_ELEMENT,
             function (MoveElementEvent $event) {
-                if ($event->element) {
-                    CacheFlag::$plugin->cacheFlag->deleteFlaggedCachesByElement($event->element);
+                $element = $event->element;
+                if (!$element || ElementHelper::isDraftOrRevision($element)) {
+                    return;
                 }
+                CacheFlag::$plugin->cacheFlag->invalidateFlaggedCachesByElement($element);
             }
         );
 
@@ -151,10 +181,14 @@ class CacheFlag extends Plugin
                     return;
                 }
 
+                /** @var ElementInterface[] $elements */
                 $elements = $criteria->all();
 
                 foreach ($elements as $element) {
-                    CacheFlag::$plugin->cacheFlag->deleteFlaggedCachesByElement($element);
+                    if (ElementHelper::isDraftOrRevision($element)) {
+                        continue;
+                    }
+                    CacheFlag::$plugin->cacheFlag->invalidateFlaggedCachesByElement($element);
                 }
             }
         );
@@ -163,7 +197,7 @@ class CacheFlag extends Plugin
     /**
      *  Maybe register CP assets bundle and variable
      */
-    protected function registerResources()
+    protected function maybeRegisterResources()
     {
 
         $request = Craft::$app->getRequest();
@@ -171,14 +205,6 @@ class CacheFlag extends Plugin
         if (!Craft::$app->getUser() || !$request->getIsCpRequest() || $request->getIsConsoleRequest() || ($request->getSegments()[0] ?? null) !== 'cache-flag') {
             return;
         }
-
-        Event::on(
-            Plugins::class,
-            Plugins::EVENT_AFTER_LOAD_PLUGINS,
-            function () {
-                Craft::$app->getView()->registerAssetBundle(CpBundle::class);
-            }
-        );
 
         // Register CP variable
         Event::on(

@@ -29,8 +29,7 @@ class CpVariable
      */
     public function getVersion()
     {
-        $plugin = Craft::$app->getPlugins()->getPlugin('cache-flag');
-        return $plugin->getVersion();
+        return Craft::$app->getPlugins()->getPlugin('cache-flag')->getVersion();
     }
 
     /**
@@ -38,8 +37,7 @@ class CpVariable
      */
     public function getDocumentationUrl()
     {
-        $info = Craft::$app->getPlugins()->getComposerPluginInfo('cache-flag');
-        return $info['documentationUrl'] ?? null;
+        return Craft::$app->getPlugins()->getComposerPluginInfo('cache-flag')['documentationUrl'] ?? null;
     }
 
     /**
@@ -47,7 +45,7 @@ class CpVariable
      */
     public function getCpTabs(): array
     {
-        return CacheFlag::$plugin->cacheFlag->getCpTabs();
+        return CacheFlag::getInstance()->cacheFlag->getCpTabs();
     }
 
     /**
@@ -55,7 +53,7 @@ class CpVariable
      */
     public function getSources(): array
     {
-        return CacheFlag::$plugin->cacheFlag->getSources();
+        return CacheFlag::getInstance()->cacheFlag->getSources();
     }
 
     /**
@@ -63,15 +61,16 @@ class CpVariable
      */
     public function getAllFlags(): array
     {
-        return CacheFlag::$plugin->cacheFlag->getAllFlags();
+        return CacheFlag::getInstance()->cacheFlag->getAllFlags();
     }
 
     /**
      * @param string $flags
      * @return bool
+     * @deprecated since 1.1.0
      */
     public function flagsHasCaches($flag): bool
     {
-        return CacheFlag::$plugin->cacheFlag->flagsHasCaches($flag);
+        return CacheFlag::getInstance()->cacheFlag->flagsHasCaches($flag);
     }
 }

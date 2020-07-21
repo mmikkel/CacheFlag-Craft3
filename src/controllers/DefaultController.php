@@ -56,10 +56,10 @@ class DefaultController extends Controller
 
             try {
                 if (!$flags) {
-                    CacheFlag::$plugin->cacheFlag->deleteFlagsBySource($sourceColumn, $sourceId);
+                    CacheFlag::getInstance()->cacheFlag->deleteFlagsBySource($sourceColumn, $sourceId);
                     continue;
                 }
-                CacheFlag::$plugin->cacheFlag->saveFlags($flags, $sourceColumn, $sourceId);
+                CacheFlag::getInstance()->cacheFlag->saveFlags($flags, $sourceColumn, $sourceId);
             } catch (\Throwable $e) {
                 $error = $e->getMessage();
             }
@@ -80,7 +80,7 @@ class DefaultController extends Controller
         return $this->asJson([
             'success' => true,
             'message' => $this->_getRandomSuccessMessage(),
-            'flags' => CacheFlag::$plugin->cacheFlag->getAllFlags(),
+            'flags' => CacheFlag::getInstance()->cacheFlag->getAllFlags(),
         ]);
 
     }
@@ -89,8 +89,19 @@ class DefaultController extends Controller
      * @return \yii\web\Response
      * @throws BadRequestHttpException
      * @throws \yii\base\InvalidConfigException
+     * @deprecated since 1.1.0
      */
     public function actionDeleteFlaggedCachesByFlags()
+    {
+        return $this->actionInvalidateFlaggedCachesByFlags();
+    }
+
+    /**
+     * @return \yii\web\Response
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionInvalidateFlaggedCachesByFlags()
     {
         $this->requirePostRequest();
         $this->requireAcceptsJson();
@@ -101,14 +112,14 @@ class DefaultController extends Controller
         if (!$flags) {
             return $this->asJson([
                 'success' => false,
-                'message' => Craft::t('cache-flag', 'No flags to clear'),
+                'message' => Craft::t('cache-flag', 'No flags to invalidate caches for'),
             ]);
         }
 
         $error = null;
 
         try {
-            CacheFlag::$plugin->cacheFlag->deleteFlaggedCachesByFlags($flags);
+            CacheFlag::getInstance()->cacheFlag->deleteFlaggedCachesByFlags($flags);
         } catch (\Throwable $e) {
             $error = $e->getMessage();
         }
@@ -119,26 +130,37 @@ class DefaultController extends Controller
                 'message' => $error,
             ]);
         }
-        
+
         return $this->asJson([
             'success' => true,
-            'message' => Craft::t('cache-flag', 'Caches cleared'),
+            'message' => Craft::t('cache-flag', 'Caches invalidated'),
         ]);
-
     }
 
     /**
      * @return \yii\web\Response
      * @throws BadRequestHttpException
+     * @throws \craft\errors\MissingComponentException
+     * @deprecated since 1.1.0
      */
     public function actionDeleteAllFlaggedCaches()
+    {
+        return $this->actionInvalidateAllFlaggedCaches();
+    }
+
+    /**
+     * @return \yii\web\Response
+     * @throws BadRequestHttpException
+     * @throws \craft\errors\MissingComponentException
+     */
+    public function actionInvalidateAllFlaggedCaches()
     {
         $this->requirePostRequest();
 
         $error = null;
 
         try {
-            CacheFlag::$plugin->cacheFlag->deleteAllFlaggedCaches();
+            CacheFlag::getInstance()->cacheFlag->deleteAllFlaggedCaches();
         } catch (\Throwable $e) {
             $error = $e;
         }
@@ -146,7 +168,7 @@ class DefaultController extends Controller
         if ($error) {
             Craft::$app->getSession()->setError($error);
         } else {
-            Craft::$app->getSession()->setNotice(Craft::t('cache-flag', 'All flagged caches cleared'));
+            Craft::$app->getSession()->setNotice(Craft::t('cache-flag', 'All flagged caches invalidated'));
         }
 
         return $this->redirectToPostedUrl();

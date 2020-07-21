@@ -1,8 +1,7 @@
-{% extends '_layouts/cp' %}
+{% extends 'cache-flag/_layouts/default.twig' %}
 {% import '_includes/forms' as forms %}
 
-{% set title = 'Cache Flag'|t('cache-flag') %}
-{% set tabs = craft.cacheFlag.getCpTabs() %}
+{% set title = 'Flags'|t('cache-flag') %}
 {% set selectedTab = 'cacheFlagIndex' %}
 
 {% set sources = craft.cacheFlag.getSources() %}
@@ -12,10 +11,9 @@
 
     <div class="cacheFlag-flags">
 
-        <header class="cacheFlag-header">
-            <h2 id="cacheFlag-flagsTitle">{{ 'Flags'|t('cache-flag') }}</h2>
+        <div class="cacheFlag-header">
             <p>{{ 'Separate multiple flags with commas.'|t('cache-flag') }}</p>
-        </header>
+        </div>
 
         <form class="cacheFlag-form" method="post" accept-charset="UTF-8" data-saveshortcut data-csrf-name="{{ craft.app.config.general.csrfTokenName }}" data-csrf-token="{{ craft.app.request.csrfToken }}">
 
@@ -35,9 +33,9 @@
                     <table id="cacheFlag-{{ sourceGroup.name|snake }}" class="data fullwidth collapsible cacheFlag-table">
 
                         <thead class="cacheFlag-tableHeader">
-                        <th scope="col">{{ 'Name'|t('app') }}</th>
-                        <th scope="col">{{ 'Flags'|t('cache-flag') }}</th>
-                        <th scope="col"></th>
+                            <th scope="col">{{ 'Name'|t('app') }}</th>
+                            <th scope="col">{{ 'Flags'|t('cache-flag') }}</th>
+                            <th scope="col"></th>
                         </thead>
 
                         <tbody class="cacheFlag-tableBody">
@@ -73,7 +71,7 @@
 
                                 <td scope="col" class="cacheFlag-flagsActions">
                                     {% set flagHasCaches = sourceFlags and craft.cacheFlag.flagsHasCaches(sourceFlags) %}
-                                    <button class="btn submit{{ not flagHasCaches ? ' disabled' }}" data-clearflags="{{ sourceFlags }}">{{ 'Empty caches'|t('cache-flag') }}</button>
+                                    <button class="btn submit{{ not flagHasCaches ? ' disabled' }}" data-clearflags="{{ sourceFlags }}">{{ 'Invalidate caches'|t('cache-flag') }}</button>
                                 </td>
 
                             </tr>
@@ -86,18 +84,20 @@
 
             {% endfor %}
 
-            <input type="submit" class="cacheFlag-inputSubmit btn submit" value="{{ 'Save all flags'|t('cache-flag') }}"/>
+            <input type="submit" class="cacheFlag-inputSubmit btn submit" value="{{ 'Save flags'|t('cache-flag') }}"/>
 
             <div class="spinner hidden"></div>
 
         </form>
 
+        <hr/>
+
         <section aria-labelledby="{{ 'General'|t('cache-flag') }}">
             <form method="post" accept-charset="UTF-8" class="cacheFlag-clearAllCachesForm">
                 {{ csrfInput() }}
                 <input type="submit" class="cacheFlag-inputSubmit btn submit"
-                       value="{{ 'Clear all flagged caches'|t('cache-flag') }}"/>
-                <input type="hidden" name="action" value="cache-flag/default/delete-all-flagged-caches">
+                       value="{{ 'Invalidate all flagged caches'|t('cache-flag') }}"/>
+                <input type="hidden" name="action" value="cache-flag/default/invalidate-all-flagged-caches">
             </form>
         </section>
 

@@ -8,45 +8,24 @@
 
 namespace mmikkel\cacheflag\services;
 
-use craft\db\Table;
-use mmikkel\cacheflag\CacheFlag;
-use mmikkel\cacheflag\records\Flagged;
-
 use Craft;
-use craft\base\Element;
-use craft\base\ElementInterface;
-use craft\db\Query;
-use craft\elements\db\ElementQuery;
-use craft\events\DeleteTemplateCachesEvent;
-use craft\helpers\DateTimeHelper;
-use craft\helpers\Db;
+use craft\base\Component;
 use craft\helpers\StringHelper;
 use craft\services\TemplateCaches;
-use craft\queue\jobs\DeleteStaleTemplateCaches;
+use yii\caching\TagDependency;
 use DateTime;
 
-use yii\base\Component;
-use yii\base\Event;
-use yii\web\Response;
-
+/**
+ * Class TemplateCachesService
+ * @author    Mats Mikkel Rummelhoff
+ * @package mmikkel\cacheflag\services
+ * @since 1.0.0
+ */
 class TemplateCachesService extends Component
 {
 
-    // Properties
-    // =========================================================================
-    /**
-     * The table that template caches are stored in.
-     *
-     * @var string
-     */
-    private static $_templateCachesTable = '{{%templatecaches}}';
-
-    /**
-     * The current request's path, as it will be stored in the templatecaches table.
-     *
-     * @var string|null
-     */
-    private $_path;
+    /** @var bool */
+    private $_collectElementTags = false;
 
     // Public Methods
     // =========================================================================
@@ -54,87 +33,73 @@ class TemplateCachesService extends Component
      * Returns a cached template by its key.
      *
      * @param string $key The template cache key
-     * @param mixed|null $flags The Cache Flag flags this cache would've been flagged with
+     * @param string|string[]|null $flags The Cache Flag flags this cache would've been flagged with
+     * @param bool $collectElementTags Whether to cache element queries or not
      * @param bool $global Whether the cache would have been stored globally.
      * @return string|null
      */
-    public function getTemplateCache(string $key, $flags = null, bool $global)
+    public function getTemplateCache(string $key, $flags, bool $collectElementTags, bool $global)
     {
         // Make sure template caching is enabled
         if ($this->_isTemplateCachingEnabled() === false) {
             return null;
         }
-        // Don't return anything if it's not a global request and the path > 255 characters.
-        if (!$global && strlen($this->_getPath()) > 255) {
+
+        $this->_collectElementTags = $collectElementTags;
+
+        $cacheKey = $this->_cacheKey($key, $global);
+        $data = Craft::$app->getCache()->get($cacheKey);
+
+        if ($data === false) {
             return null;
         }
-        // Take the opportunity to delete any expired caches
-        Craft::$app->getTemplateCaches()->deleteExpiredCachesIfOverdue();
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $query = (new Query())
-            ->select(['body'])
-            ->from([self::$_templateCachesTable . ' templatecaches'])
-            ->where([
-                'and',
-                [
-                    'cacheKey' => $key,
-                    'siteId' => Craft::$app->getSites()->getCurrentSite()->id
-                ],
-                ['>', 'expiryDate', Db::prepareDateForDb(new \DateTime())],
-            ]);
-        if (!$global) {
-            $query->andWhere([
-                'path' => $this->_getPath()
-            ]);
-        }
-        if ($flags) {
 
-            // Sanitize flags
-            if (\is_array($flags)) {
-                $flags = \implode(',', \array_map(function ($flag) {
-                    return \preg_replace('/\s+/', '', $flag);
-                }, $flags));
-            } else {
-                $flags = \preg_replace('/\s+/', '', $flags);
-            }
+        list($body, $tags) = $data;
 
-            $flags = \implode(',', \explode('|', $flags));
+        // Make sure the cache was tagged w/ the same flags
+        $flagTags = $this->_getTagsForFlags($flags);
+        $cachedFlagTags = \array_filter($tags, function (string $tag) {
+            return \strpos($tag, 'cacheflag') === 0 || $tag === 'element';
+        });
 
-            $query
-                ->innerJoin(
-                    Flagged::tableName() . ' flagged',
-                    '[[flagged.cacheId]] = [[templatecaches.id]]'
-                )
-                ->andWhere(['flagged.flags' => $flags]);
-        }
-        $cachedBody = $query->scalar();
-        if ($cachedBody === false) {
+        if (\array_diff($flagTags, $cachedFlagTags) != \array_diff($cachedFlagTags, $flagTags)) {
             return null;
         }
-        return $cachedBody;
+
+        // If we're actively collecting element cache tags, add this cache's tags to the collection
+        Craft::$app->getElements()->collectCacheTags($tags);
+        return $body;
     }
 
     /**
-     * Starts a new template cache.
+     * @param string $key
      */
-    public function startTemplateCache()
+    public function startTemplateCache(string $key)
     {
-        return;
+        // Make sure template caching is enabled
+        if ($this->_isTemplateCachingEnabled() === false) {
+            return;
+        }
+
+        if ($this->_collectElementTags) {
+            Craft::$app->getElements()->startCollectingCacheTags();
+        }
     }
 
     /**
      * Ends a template cache.
      *
      * @param string $key The template cache key.
-     * @param mixed|null $flags The Cache Flag flags this cache should be flagged with.
+     * @param string|null $flags The flags this cache should be flagged with.
      * @param bool $global Whether the cache should be stored globally.
      * @param string|null $duration How long the cache should be stored for. Should be a [relative time format](http://php.net/manual/en/datetime.formats.relative.php).
      * @param mixed|null $expiration When the cache should expire.
      * @param string $body The contents of the cache.
      * @throws \Throwable
      */
-    public function endTemplateCache(string $key, $flags = null, bool $global, string $duration = null, $expiration, string $body)
+    public function endTemplateCache(string $key, $flags, bool $global, string $duration = null, $expiration, string $body)
     {
+
         // Make sure template caching is enabled
         if ($this->_isTemplateCachingEnabled() === false) {
             return;
@@ -146,117 +111,27 @@ class TemplateCachesService extends Component
             return;
         }
 
-        if (!$global && (strlen($path = $this->_getPath()) > 255)) {
-            Craft::warning('Skipped adding ' . $key . ' to template cache table because the path is > 255 characters: ' . $path, __METHOD__);
+        // Get flag tags
+        $flagTags = $this->_getTagsForFlags($flags);
 
-            return;
+        if ($this->_collectElementTags) {
+            // If we're collecting element tags, collect the flag tags too, and end the collection
+            Craft::$app->getElements()->collectCacheTags($flagTags);
+            $dep = Craft::$app->getElements()->stopCollectingCacheTags();
+        } else {
+            // If not, just tag it with the flags
+            $dep = new TagDependency([
+                'tags' => $flagTags,
+            ]);
         }
 
-        if (Craft::$app->getDb()->getIsMysql()) {
-            // Encode any 4-byte UTF-8 characters
-            $body = StringHelper::encodeMb4($body);
-        }
+        $cacheKey = $this->_cacheKey($key, $global);
 
-        // Figure out the expiration date
         if ($duration !== null) {
-            $expiration = new DateTime($duration);
+            $duration = (new DateTime($duration))->getTimestamp() - time();
         }
 
-        if (!$expiration) {
-            $cacheDuration = Craft::$app->getConfig()->getGeneral()->cacheDuration;
-
-            if ($cacheDuration <= 0) {
-                $cacheDuration = 31536000; // 1 year
-            }
-
-            $cacheDuration += time();
-
-            $expiration = new DateTime('@' . $cacheDuration);
-        }
-
-        // Save it
-        $transaction = Craft::$app->getDb()->beginTransaction();
-
-        try {
-            Craft::$app->getDb()->createCommand()
-                ->insert(
-                    self::$_templateCachesTable,
-                    [
-                        'cacheKey' => $key,
-                        'siteId' => Craft::$app->getSites()->getCurrentSite()->id,
-                        'path' => $global ? null : $this->_getPath(),
-                        'expiryDate' => Db::prepareDateForDb($expiration),
-                        'body' => $body
-                    ],
-                    false)
-                ->execute();
-
-            if ($flags) {
-
-                $cacheId = Craft::$app->getDb()->getLastInsertID(self::$_templateCachesTable);
-
-                // Sanitize flags
-                if (\is_array($flags)) {
-                    $flags = \implode(',', \array_map(function ($flag) {
-                        return \preg_replace('/\s+/', '', $flag);
-                    }, $flags));
-                } else {
-                    $flags = \preg_replace('/\s+/', '', $flags);
-                }
-
-                $flags = \implode(',', \explode('|', $flags));
-
-                Craft::$app->getDb()->createCommand()
-                    ->insert(
-                        Flagged::tableName(),
-                        [
-                            'cacheId' => $cacheId,
-                            'flags' => $flags
-                        ],
-                        false
-                    )
-                    ->execute();
-            }
-
-            $transaction->commit();
-        } catch (\Throwable $e) {
-            $transaction->rollBack();
-
-            throw $e;
-        }
-    }
-
-    /**
-     * Deletes a cache by its ID(s).
-     *
-     * @param int|int[] $cacheId The cache ID(s)
-     * @return bool
-     */
-    public function deleteCacheById($cacheId): bool
-    {
-        if (is_array($cacheId) && empty($cacheId)) {
-            return false;
-        }
-
-        // Fire a 'beforeDeleteCaches' event
-        if (Craft::$app->getTemplateCaches()->hasEventHandlers(TemplateCaches::EVENT_BEFORE_DELETE_CACHES)) {
-            Craft::$app->getTemplateCaches()->trigger(TemplateCaches::EVENT_BEFORE_DELETE_CACHES, new DeleteTemplateCachesEvent([
-                'cacheIds' => (array)$cacheId
-            ]));
-        }
-
-        $affectedRows = Craft::$app->getDb()->createCommand()
-            ->delete(Table::TEMPLATECACHES, ['id' => $cacheId])
-            ->execute();
-
-        // Fire an 'afterDeleteCaches' event
-        if ($affectedRows && Craft::$app->getTemplateCaches()->hasEventHandlers(TemplateCaches::EVENT_AFTER_DELETE_CACHES)) {
-            Craft::$app->getTemplateCaches()->trigger(TemplateCaches::EVENT_AFTER_DELETE_CACHES, new DeleteTemplateCachesEvent([
-                'cacheIds' => (array)$cacheId
-            ]));
-        }
-
-        return (bool)$affectedRows;
+        Craft::$app->getCache()->set($cacheKey, [$body, $dep->tags], $duration, $dep);
     }
 
     // Private Methods
@@ -272,25 +147,74 @@ class TemplateCachesService extends Component
     }
 
     /**
+     * Defines a data cache key that should be used for a template cache.
+     *
+     * @param string $key
+     * @param bool $global
+     */
+    private function _cacheKey(string $key, bool $global): string
+    {
+        $cacheKey = "template::$key::" . Craft::$app->getSites()->getCurrentSite()->id;
+
+        if (!$global) {
+            $cacheKey .= '::' . $this->_path();
+        }
+
+        return $cacheKey;
+    }
+
+    /**
      * Returns the current request path, including a "site:" or "cp:" prefix.
      *
      * @return string
      */
-    private function _getPath(): string
+    private function _path(): string
     {
         if ($this->_path !== null) {
             return $this->_path;
         }
+
         if (Craft::$app->getRequest()->getIsCpRequest()) {
             $this->_path = 'cp:';
         } else {
             $this->_path = 'site:';
         }
+
         $this->_path .= Craft::$app->getRequest()->getPathInfo();
-        if (($pageNum = Craft::$app->getRequest()->getPageNum()) != 1) {
-            $this->_path .= '/' . Craft::$app->getConfig()->getGeneral()->pageTrigger . $pageNum;
+        if (Craft::$app->getDb()->getIsMysql()) {
+            $this->_path = StringHelper::encodeMb4($this->_path);
         }
+
+        if (($pageNum = Craft::$app->getRequest()->getPageNum()) != 1) {
+            $this->_path .= '/' . Craft::$app->getConfig()->getGeneral()->getPageTrigger() . $pageNum;
+        }
+
         return $this->_path;
+    }
+
+    /**
+     * @param string|array|null $flags
+     * @param string $delimiter
+     * @return array
+     */
+    private function _getTagsForFlags($flags, string $delimiter = '|'): array
+    {
+        $tagsArray = ['cacheflag'];
+        if (\is_array($flags)) {
+            $flags = \implode(',', \array_map(function ($flag) {
+                return \preg_replace('/\s+/', '', $flag);
+            }, $flags));
+        } else {
+            $flags = \preg_replace('/\s+/', '', $flags);
+        }
+        $flags = \array_filter(\explode($delimiter, $flags));
+        $tagsArray = \array_merge($tagsArray, \array_map(function (string $flag) {
+            return "cacheflag::$flag";
+        }, $flags));
+        if ($this->_collectElementTags) {
+            $tagsArray[] = 'element';
+        }
+        return \array_unique(($tagsArray));
     }
 
 }

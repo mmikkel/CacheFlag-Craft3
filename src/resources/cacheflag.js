@@ -71,7 +71,7 @@ $(function () {
 
         e.preventDefault();
 
-        var actionUrl = Craft.getActionUrl('cache-flag/default/delete-flagged-caches-by-flags'),
+        var actionUrl = Craft.getActionUrl('cache-flag/default/invalidate-flagged-caches-by-flags'),
             $target = $(e.currentTarget),
             flags = $target.data('clearflags');
 
@@ -96,8 +96,8 @@ $(function () {
                     Craft.cp.displayNotice(response.message);
                 } else {
                     Craft.cp.displayError(response.message);
-                    $target.removeClass('disabled');
                 }
+                $target.removeClass('disabled');
             },
             error: function (response) {
                 if (response.statusText !== 'abort') {

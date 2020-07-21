@@ -72,19 +72,6 @@ class Install extends Migration
     {
         $tablesCreated = false;
 
-        $tableSchema = Craft::$app->db->schema->getTableSchema('{{%cacheflag_flagged}}');
-        if ($tableSchema === null) {
-            $tablesCreated = true;
-            $this->createTable(
-                '{{%cacheflag_flagged}}',
-                [
-                    'id' => $this->primaryKey(),
-                    'flags' => $this->string(255)->notNull(),
-                    'cacheId' => $this->integer()->notNull(),
-                ]
-            );
-        }
-
         $tableSchema = Craft::$app->db->schema->getTableSchema('{{%cacheflag_flags}}');
         if ($tableSchema === null) {
             $tablesCreated = true;
@@ -114,24 +101,6 @@ class Install extends Migration
     {
         $this->createIndex(
             $this->db->getIndexName(
-                '{{%cacheflag_flagged}}',
-                'flags',
-                false
-            ),
-            '{{%cacheflag_flagged}}',
-            'flags',
-            false
-        );
-        // Additional commands depending on the db driver
-        switch ($this->driver) {
-            case DbConfig::DRIVER_MYSQL:
-                break;
-            case DbConfig::DRIVER_PGSQL:
-                break;
-        }
-
-        $this->createIndex(
-            $this->db->getIndexName(
                 '{{%cacheflag_flags}}',
                 'flags',
                 false
@@ -154,16 +123,6 @@ class Install extends Migration
      */
     protected function addForeignKeys()
     {
-        $this->addForeignKey(
-            $this->db->getForeignKeyName('{{%cacheflag_flagged}}', 'cacheId'),
-            '{{%cacheflag_flagged}}',
-            'cacheId',
-            '{{%templatecaches}}',
-            'id',
-            'CASCADE',
-            'CASCADE'
-        );
-
         $this->addForeignKey(
             $this->db->getForeignKeyName('{{%cacheflag_flags}}', 'sectionId'),
             '{{%cacheflag_flags}}',

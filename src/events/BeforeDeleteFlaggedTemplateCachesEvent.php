@@ -8,6 +8,11 @@
 
 namespace mmikkel\cacheflag\events;
 
+/**
+ * Class BeforeDeleteFlaggedTemplateCachesEvent
+ * @package mmikkel\cacheflag\events
+ * @deprecated since 1.1.0
+ */
 class BeforeDeleteFlaggedTemplateCachesEvent extends \yii\base\Event
 {
 

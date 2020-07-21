@@ -19,6 +19,7 @@ use craft\db\ActiveRecord;
  * @author    Mats Mikkel Rummelhoff
  * @package   CacheFlag
  * @since     1.0.0
+ * @deprecated in 1.1.0
  */
 class Flagged extends ActiveRecord
 {
