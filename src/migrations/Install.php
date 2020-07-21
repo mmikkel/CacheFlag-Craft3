@@ -13,7 +13,6 @@ namespace mmikkel\cacheflag\migrations;
 use mmikkel\cacheflag\CacheFlag;
 
 use Craft;
-use craft\config\DbConfig;
 use craft\db\Migration;
 
 /**
@@ -109,13 +108,6 @@ class Install extends Migration
             'flags',
             false
         );
-        // Additional commands depending on the db driver
-        switch ($this->driver) {
-            case DbConfig::DRIVER_MYSQL:
-                break;
-            case DbConfig::DRIVER_PGSQL:
-                break;
-        }
     }
 
     /**
