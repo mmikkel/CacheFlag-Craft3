@@ -85,8 +85,6 @@ $(function () {
 
         data[$form.data('csrf-name')] = $form.data('csrf-token');
 
-        $target.addClass('disabled');
-
         $.ajax(actionUrl, {
             type: 'POST',
             data: data,
@@ -97,13 +95,11 @@ $(function () {
                 } else {
                     Craft.cp.displayError(response.message);
                 }
-                $target.removeClass('disabled');
             },
             error: function (response) {
                 if (response.statusText !== 'abort') {
                     Craft.cp.displayError(response.statusText);
                 }
-                $target.removeClass('disabled');
             }
         });
 

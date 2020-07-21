@@ -119,7 +119,7 @@ class DefaultController extends Controller
         $error = null;
 
         try {
-            CacheFlag::getInstance()->cacheFlag->deleteFlaggedCachesByFlags($flags);
+            CacheFlag::getInstance()->cacheFlag->invalidateFlaggedCachesByFlags($flags);
         } catch (\Throwable $e) {
             $error = $e->getMessage();
         }
@@ -160,7 +160,7 @@ class DefaultController extends Controller
         $error = null;
 
         try {
-            CacheFlag::getInstance()->cacheFlag->deleteAllFlaggedCaches();
+            CacheFlag::getInstance()->cacheFlag->invalidateAllFlaggedCaches();
         } catch (\Throwable $e) {
             $error = $e;
         }

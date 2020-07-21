@@ -27,6 +27,12 @@ class TemplateCachesService extends Component
     /** @var bool */
     private $_collectElementTags = false;
 
+    /**
+     * @var string|null The current request's path
+     * @see _path()
+     */
+    private $_path;
+
     // Public Methods
     // =========================================================================
     /**
@@ -72,9 +78,9 @@ class TemplateCachesService extends Component
     }
 
     /**
-     * @param string $key
+     *
      */
-    public function startTemplateCache(string $key)
+    public function startTemplateCache()
     {
         // Make sure template caching is enabled
         if ($this->_isTemplateCachingEnabled() === false) {
@@ -97,7 +103,7 @@ class TemplateCachesService extends Component
      * @param string $body The contents of the cache.
      * @throws \Throwable
      */
-    public function endTemplateCache(string $key, $flags, bool $global, string $duration = null, $expiration, string $body)
+    public function endTemplateCache(string $key, $flags, bool $global, string $duration = null, /** @scrutinizer ignore-unused */ $expiration, string $body)
     {
 
         // Make sure template caching is enabled

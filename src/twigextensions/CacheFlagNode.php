@@ -105,7 +105,7 @@ class CacheFlagNode extends Node
             ->indent()
             ->write("if (!\$ignoreCache{$n}) {\n")
             ->indent()
-            ->write("\$cacheService->startTemplateCache(\$cacheKey{$n});\n")
+            ->write("\$cacheService->startTemplateCache();\n")
             ->outdent()
             ->write("}\n")
             ->write("ob_start();\n")

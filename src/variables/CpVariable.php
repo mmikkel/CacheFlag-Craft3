@@ -69,8 +69,8 @@ class CpVariable
      * @return bool
      * @deprecated since 1.1.0
      */
-    public function flagsHasCaches($flag): bool
+    public function flagsHasCaches(): bool
     {
-        return CacheFlag::getInstance()->cacheFlag->flagsHasCaches($flag);
+        return true;
     }
 }

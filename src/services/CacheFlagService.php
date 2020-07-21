@@ -234,11 +234,10 @@ class CacheFlagService extends Component
     }
 
     /**
-     * @param string|string[] $flags
      * @return bool
      * @deprecated since 1.1.0
      */
-    public function flagsHasCaches($flags): bool
+    public function flagsHasCaches(): bool
     {
         return true;
     }
@@ -350,18 +349,20 @@ class CacheFlagService extends Component
     }
 
     /**
-     * @param string|string[] $flags
+     * @param string|string[]|null $flags
      * @return bool
      */
     public function invalidateFlaggedCachesByFlags($flags): bool
     {
 
+        if (!$flags) {
+            return false;
+        }
+
         if (\is_array($flags)) {
             $flags = $this->implodeFlagsArray($flags);
-        } else if (\is_string($flags)) {
-            $flags = \preg_replace('/\s+/', '', $flags);
         } else {
-            return false;
+            $flags = \preg_replace('/\s+/', '', $flags);
         }
 
         $flags = \array_values(\array_unique(\explode(',', $flags)));
@@ -371,9 +372,9 @@ class CacheFlagService extends Component
         }
 
         // Fire a 'beforeDeleteFlaggedCaches' event
-        if ($this->hasEventHandlers(self::EVENT_BEFORE_DELETE_FLAGGED_CACHES)) {
+        if ($this->hasEventHandlers(/** @scrutinizer ignore-deprecated */ self::EVENT_BEFORE_DELETE_FLAGGED_CACHES)) {
             Craft::$app->getDeprecator()->log('CacheFlagService::EVENT_BEFORE_DELETE_FLAGGED_CACHES', 'The `EVENT_BEFORE_DELETE_FLAGGED_CACHES` event has been deprecated. Use \mmikkel\cacheflag\services\CacheFlagService::EVENT_BEFORE_INVALIDATE_FLAGGED_CACHES instead.');
-            $this->trigger(self::EVENT_BEFORE_DELETE_FLAGGED_CACHES, new BeforeDeleteFlaggedTemplateCachesEvent([
+            $this->trigger(/** @scrutinizer ignore-deprecated */ self::EVENT_BEFORE_DELETE_FLAGGED_CACHES, /** @scrutinizer ignore-deprecated */ new BeforeDeleteFlaggedTemplateCachesEvent([
                 'cacheIds' => [],
                 'flags' => $flags,
             ]));
@@ -393,9 +394,9 @@ class CacheFlagService extends Component
         TagDependency::invalidate(Craft::$app->getCache(), $flagTags);
 
         // Fire a 'afterDeleteFlaggedCaches' event
-        if ($this->hasEventHandlers(self::EVENT_AFTER_DELETE_FLAGGED_CACHES)) {
+        if ($this->hasEventHandlers(/** @scrutinizer ignore-deprecated */ self::EVENT_AFTER_DELETE_FLAGGED_CACHES)) {
             Craft::$app->getDeprecator()->log('CacheFlagService::EVENT_AFTER_DELETE_FLAGGED_CACHES', 'The `EVENT_AFTER_DELETE_FLAGGED_CACHES` event has been deprecated. Use \mmikkel\cacheflag\services\CacheFlagService::EVENT_AFTER_INVALIDATE_FLAGGED_CACHES instead.');
-            $this->trigger(self::EVENT_AFTER_DELETE_FLAGGED_CACHES, new AfterDeleteFlaggedTemplateCachesEvent([
+            $this->trigger(/** @scrutinizer ignore-deprecated */ self::EVENT_AFTER_DELETE_FLAGGED_CACHES, /** @scrutinizer ignore-deprecated */ new AfterDeleteFlaggedTemplateCachesEvent([
                 'cacheIds' => [],
                 'flags' => $flags,
             ]));
