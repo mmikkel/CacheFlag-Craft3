@@ -11,6 +11,10 @@
 namespace mmikkel\cacheflag\twigextensions;
 
 use mmikkel\cacheflag\CacheFlag;
+use mmikkel\cacheflag\twigextensions\CacheFlagTokenParser;
+
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 
 use Craft;
 
@@ -19,7 +23,7 @@ use Craft;
  * @package   CacheFlag
  * @since     1.0.0
  */
-class Extension extends \Twig_Extension
+class Extension extends AbstractExtension
 {
     // Public Methods
     // =========================================================================
@@ -38,7 +42,7 @@ class Extension extends \Twig_Extension
     public function getFilters()
     {
         return \array_filter([
-            Craft::$app->getRequest()->getIsCpRequest() ? new \Twig_SimpleFilter('cacheFlagUnCamelCase', [$this, 'cacheFlagUnCamelCaseFilter']) : null,
+            Craft::$app->getRequest()->getIsCpRequest() ? new TwigFilter('cacheFlagUnCamelCase', [$this, 'cacheFlagUnCamelCaseFilter']) : null,
         ]);
     }
 
