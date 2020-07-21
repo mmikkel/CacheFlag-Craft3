@@ -1,5 +1,7 @@
 # Cache Flag plugin for Craft CMS 3.x
 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mmikkel/CacheFlag-Craft3/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mmikkel/CacheFlag-Craft3/?branch=master)
+
 Cold template caches that can be flagged and automatically invalidated.
 
 ## Requirements and installations
