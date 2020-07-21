@@ -22,6 +22,31 @@ use craft\db\ActiveRecord;
  */
 class Flags extends ActiveRecord
 {
+
+    /** @var string|null */
+    public $flags;
+
+    /** @var int|null */
+    public $sectionId;
+
+    /** @var int|null */
+    public $categoryGroupId;
+
+    /** @var int|null */
+    public $tagGroupId;
+
+    /** @var int|null */
+    public $userGroupId;
+
+    /** @var int|null */
+    public $volumeId;
+
+    /** @var int|null */
+    public $globalSetId;
+
+    /** @var string|null */
+    public $elementType;
+
     // Public Static Methods
     // =========================================================================
 

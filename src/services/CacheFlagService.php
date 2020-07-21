@@ -177,8 +177,7 @@ class CacheFlagService extends Component
                         Flags::tableName(),
                         ['flags' => $flags],
                         "id=:id",
-                        [':id' => $flagsId],
-                        false
+                        [':id' => $flagsId]
                     )
                     ->execute();
 
@@ -190,8 +189,7 @@ class CacheFlagService extends Component
                         [
                             'flags' => $flags,
                             $sourceColumn => $sourceId,
-                        ],
-                        false)
+                        ])
                     ->execute();
             }
 

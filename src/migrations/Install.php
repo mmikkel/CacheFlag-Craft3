@@ -86,6 +86,9 @@ class Install extends Migration
                     'volumeId' => $this->integer()->unique(),
                     'globalSetId' => $this->integer()->unique(),
                     'elementType' => $this->string(255)->unique(),
+                    'dateCreated' => $this->dateTime()->notNull(),
+                    'dateUpdated' => $this->dateTime()->notNull(),
+                    'uid' => $this->uid(),
                 ]
             );
         }
@@ -189,7 +192,6 @@ class Install extends Migration
     protected function removeTables()
     {
         $this->dropTableIfExists('{{%cacheflag_flagged}}');
-
         $this->dropTableIfExists('{{%cacheflag_flags}}');
     }
 }
