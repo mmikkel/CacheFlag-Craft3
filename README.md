@@ -6,7 +6,7 @@ Cold template caches that can be flagged and automatically invalidated.
 
 ## Table of contents  
 
-* [Requirements and installations](#requirements-and-installations)  
+* [Requirements and installation](#requirements-and-installation)  
 * [What is Cache Flag?](#what-is-cache-flag)  
 * [Using Cache Flag](#using-cache-flag)  
 * [Dynamic flags](#dynamic-flags)  
@@ -15,7 +15,7 @@ Cold template caches that can be flagged and automatically invalidated.
 * [Upgrading from Craft 2](#upgrading-from-craft-2)  
 * [Events](#events)  
 
-## Requirements and installations
+## Requirements and installation
 
 **This plugin requires Craft CMS 3.5.0-RC1 or later.**  
 
