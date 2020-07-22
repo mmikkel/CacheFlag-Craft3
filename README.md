@@ -85,6 +85,8 @@ Now, the above cache would be invalidated both when the content in the "Awesome 
 
 Install the plugin, then visit Cache Flag's CP Section (there'll be a "Cache Flag" button in your Control Panel's main menu), and add flags to your content as needed. Then, add `{% cacheflag %}` tags around the template code you want to cache.  
 
+Note: Since Cache Flag v. 1.2.0, the "Cache Flag" button is **not visible** if the [`allowAdminChanges`](https://docs.craftcms.com/v3/config/config-settings.html#allowadminchanges) Craft config setting is set to `false` – since changing your flags is impossible when the Project Config is in read-only mode.  
+
 ## Dynamic flags
 
 Since Cache Flag 1.1.0, it's also possible to dynamically flag caches using element IDs (or UIDs). If you wanted to ensure that a cache is invalidated whenever a particular entry is saved (or deleted), you can do this:
