@@ -13,7 +13,7 @@ use mmikkel\cacheflag\records\Flags;
 /**
  * Class m200721_194731_add_missing_audit_columns
  * @package mmikkel\cacheflag\migrations
- * @since 1.1.1
+ * @since 1.2.0
  */
 class m200720_194731_add_missing_audit_columns extends Migration
 {

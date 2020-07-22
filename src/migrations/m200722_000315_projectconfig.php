@@ -12,7 +12,7 @@ use craft\helpers\Db;
 /**
  * Class m200722_000315_projectconfig
  * @package mmikkel\cacheflag\migrations
- * @since 1.1.1
+ * @since 1.2.0
  */
 class m200722_000315_projectconfig extends Migration
 {

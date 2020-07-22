@@ -15,7 +15,7 @@ use mmikkel\cacheflag\records\Flags;
 /**
  * Class ProjectConfig
  * @package mmikkel\cacheflag\services
- * @since 1.1.1
+ * @since 1.2.0
  */
 class ProjectConfig extends Component
 {

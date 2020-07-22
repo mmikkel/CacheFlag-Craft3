@@ -18,7 +18,7 @@ use mmikkel\cacheflag\records\Flags;
 /**
  * Class m200721_201623_migrate_craft2_flags
  * @package mmikkel\cacheflag\migrations
- * @since 1.1.1
+ * @since 1.2.0
  */
 class m200721_201623_migrate_craft2_flags extends Migration
 {
