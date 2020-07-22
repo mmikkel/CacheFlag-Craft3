@@ -3,6 +3,10 @@
 {% set title = 'About Cache Flag'|t('cache-flag') %}
 {% set selectedTab = 'about' %}
 
+{% if not craft.app.getConfig().getGeneral().allowAdminChanges %}
+    {% redirect cpUrl('cache-flag') %}
+{% endif %}
+
 {% block content %}
 
     <div class="cacheFlag-aboutPage">

@@ -11,85 +11,89 @@
 
     <div class="cacheFlag-flags">
 
-        <div class="cacheFlag-header">
-            <p>{{ 'Separate multiple flags with commas.'|t('cache-flag') }}</p>
-        </div>
+        {% if craft.app.getConfig().getGeneral().allowAdminChanges %}
 
-        <form class="cacheFlag-form" method="post" accept-charset="UTF-8" data-saveshortcut data-csrf-name="{{ craft.app.config.general.csrfTokenName }}" data-csrf-token="{{ craft.app.request.csrfToken }}">
+            <div class="cacheFlag-header">
+                <p>{{ 'Separate multiple flags with commas.'|t('cache-flag') }}</p>
+            </div>
 
-            {{ csrfInput() }}
+            <form class="cacheFlag-form" method="post" accept-charset="UTF-8" data-saveshortcut data-csrf-name="{{ craft.app.config.general.csrfTokenName }}" data-csrf-token="{{ craft.app.request.csrfToken }}">
 
-            <input type="hidden" name="action" value="cache-flag/default/save-flags"/>
-            <input type="hidden" name="cacheflags" value=""/>
+                {{ csrfInput() }}
 
-            {% for sourceGroup in sources %}
+                <input type="hidden" name="action" value="cache-flag/default/save-flags"/>
+                <input type="hidden" name="cacheflags" value=""/>
 
-                {% set sourceGroupSources = sourceGroup.sources %}
+                {% for sourceGroup in sources %}
 
-                {% if sourceGroupSources|length %}
+                    {% set sourceGroupSources = sourceGroup.sources %}
 
-                    <h3 class="cacheFlag-targetTitle">{{ sourceGroup.name }}</h3>
+                    {% if sourceGroupSources|length %}
 
-                    <table id="cacheFlag-{{ sourceGroup.name|snake }}" class="data fullwidth collapsible cacheFlag-table">
+                        <h3 class="cacheFlag-targetTitle">{{ sourceGroup.name }}</h3>
 
-                        <thead class="cacheFlag-tableHeader">
-                            <th scope="col">{{ 'Name'|t('app') }}</th>
-                            <th scope="col">{{ 'Flags'|t('cache-flag') }}</th>
-                            <th scope="col"></th>
-                        </thead>
+                        <table id="cacheFlag-{{ sourceGroup.name|snake }}" class="data fullwidth collapsible cacheFlag-table">
 
-                        <tbody class="cacheFlag-tableBody">
+                            <thead class="cacheFlag-tableHeader">
+                                <th scope="col">{{ 'Name'|t('app') }}</th>
+                                <th scope="col">{{ 'Flags'|t('cache-flag') }}</th>
+                                <th scope="col"></th>
+                            </thead>
 
-                        {% for source in sourceGroupSources %}
+                            <tbody class="cacheFlag-tableBody">
 
-                            <tr>
+                            {% for source in sourceGroupSources %}
 
-                                <td scope="col" class="cacheFlag-pointName">{{ source.name|t('app') }}</td>
+                                <tr>
 
-                                <td scope="col" class="cacheFlag-flagsInput">
+                                    <td scope="col" class="cacheFlag-pointName">{{ source.name|t('app') }}</td>
 
-                                    {% set sourceInputId = [sourceGroup.column, ':', source.id]|join %}
-                                    {% set sourceFlags = null %}
+                                    <td scope="col" class="cacheFlag-flagsInput">
 
-                                    {% for flagRecord in allFlags %}
-                                        {% set sourceFlags = (flagRecord[sourceGroup.column] ?? null) == source.id ? flagRecord.flags : sourceFlags %}
-                                    {% endfor %}
+                                        {% set sourceInputId = [sourceGroup.column, ':', source.id]|join %}
+                                        {% set sourceFlags = null %}
 
-                                    <input type="text"
-                                           class="cacheFlag-inputText cacheFlag-inputFlags text nicetext"
-                                           placeholder=""
-                                           name="cacheflags[{{ sourceInputId }}]"
-                                           size="25"
-                                           value="{{ sourceFlags }}"
-                                           autocomplete="off"
-                                           autocorrect="off"
-                                           autocapitalize="off"
-                                           spellcheck="false"
-                                    />
+                                        {% for flagRecord in allFlags %}
+                                            {% set sourceFlags = (flagRecord[sourceGroup.column] ?? null) == source.id ? flagRecord.flags : sourceFlags %}
+                                        {% endfor %}
 
-                                </td>
+                                        <input type="text"
+                                               class="cacheFlag-inputText cacheFlag-inputFlags text nicetext"
+                                               placeholder=""
+                                               name="cacheflags[{{ sourceInputId }}]"
+                                               size="25"
+                                               value="{{ sourceFlags }}"
+                                               autocomplete="off"
+                                               autocorrect="off"
+                                               autocapitalize="off"
+                                               spellcheck="false"
+                                        />
 
-                                <td scope="col" class="cacheFlag-flagsActions">
-                                    <button class="btn submit" data-clearflags="{{ sourceInputId }}">{{ 'Invalidate caches'|t('cache-flag') }}</button>
-                                </td>
+                                    </td>
 
-                            </tr>
+                                    <td scope="col" class="cacheFlag-flagsActions">
+                                        <button class="btn submit" data-clearflags="{{ sourceInputId }}">{{ 'Invalidate caches'|t('cache-flag') }}</button>
+                                    </td>
 
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                                </tr>
 
-                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
 
-            {% endfor %}
+                    {% endif %}
 
-            <input type="submit" class="cacheFlag-inputSubmit btn submit" value="{{ 'Save flags'|t('cache-flag') }}"/>
+                {% endfor %}
 
-            <div class="spinner hidden"></div>
+                <input type="submit" class="cacheFlag-inputSubmit btn submit" value="{{ 'Save flags'|t('cache-flag') }}"/>
 
-        </form>
+                <div class="spinner hidden"></div>
 
-        <hr/>
+            </form>
+
+            <hr/>
+
+        {% endif %}
 
         <section aria-labelledby="{{ 'General'|t('cache-flag') }}">
             <form method="post" accept-charset="UTF-8" class="cacheFlag-clearAllCachesForm">

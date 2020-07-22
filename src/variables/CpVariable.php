@@ -46,6 +46,9 @@ class CpVariable
      */
     public function getCpTabs(): array
     {
+        if (!Craft::$app->getConfig()->getGeneral()->allowAdminChanges) {
+            return [];
+        }
         return [
             'cacheFlagIndex' => array(
                 'label' => Craft::t('cache-flag', 'Flags'),
