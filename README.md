@@ -2,7 +2,18 @@
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mmikkel/CacheFlag-Craft3/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mmikkel/CacheFlag-Craft3/?branch=master)
 
-Cold template caches that can be flagged and automatically invalidated.
+Cold template caches that can be flagged and automatically invalidated.  
+
+## Table of contents  
+
+* [Requirements and installations](#requirements-and-installations)  
+* [What is Cache Flag?](#what-is-cache-flag)  
+* [Using Cache Flag](#using-cache-flag)  
+* [Dynamic flags](#dynamic-flags)  
+* [Collecting element tags for automatic cache invalidation](#collecting-element-tags-for-automatic-cache-invalidation)  
+* [Project Config](#project-config)  
+* [Upgrading from Craft 2](#upgrading-from-craft-2)  
+* [Events](#events)  
 
 ## Requirements and installations
 
@@ -70,6 +81,10 @@ But, suppose you also want to have the above cache invalidated whenever a _categ
 
 Now, the above cache would be invalidated both when the content in the "Awesome Entries" section is changed _and_ whenever there are any changes to the categories in your category group.  
 
+## Using Cache Flag
+
+Install the plugin, then visit Cache Flag's CP Section (there'll be a "Cache Flag" button in your Control Panel's main menu), and add flags to your content as needed. Then, add `{% cacheflag %}` tags around the template code you want to cache.  
+
 ## Dynamic flags
 
 Since Cache Flag 1.1.0, it's also possible to dynamically flag caches using element IDs (or UIDs). If you wanted to ensure that a cache is invalidated whenever a particular entry is saved (or deleted), you can do this:
@@ -107,7 +122,7 @@ Of course, it's also possible to combine both standard and dynamic cache flags f
 {% endcacheflag %}
 ```
 
-Beyond the `flagged` and `with elements` parameters, the `{% cacheflag %}` tag _supports all the same parameters_ as [the native `{% cache %}` tag[(https://docs.craftcms.com/v3/dev/tags/cache.html#app)].  
+Beyond the `flagged` and `with elements` parameters, the `{% cacheflag %}` tag _supports all the same parameters_ as [the native `{% cache %}` tag[(https://docs.craftcms.com/v3/dev/tags/cache.html#app)].    
 
 ## Collecting element tags for automatic cache invalidation
 
@@ -121,11 +136,15 @@ If you want Cache Flag to collect element tags for automatic cache invalidation,
 {% endcacheflag %}
 ```
 
-(It's also possible to omit the `flagged` parameter and only use `with elements`, but at that point the `{% cacheflag %}` tag would work identically to the native `{% cache %}` tag, and you should probably just use the latter.)  
+(It's also possible to omit the `flagged` parameter and only use `with elements`, but at that point the `{% cacheflag %}` tag would work identically to the native `{% cache %}` tag, and you should probably just use the latter.)
 
-## Using Cache Flag
+## Project Config
 
-Install the plugin, then visit Cache Flag's CP Section (there'll be a "Cache Flag" button in your Control Panel's main menu), and add flags to your content as needed. Then, add `{% cacheflag %}` tags around the template code you want to cache.  
+Cache Flag supports Project Config since v. 1.2.0. If you're upgrading from an earlier version, the relevant yaml files will be created as a migration when you upgrade.  
+
+## Upgrading from Craft 2
+
+**Since v. 1.2.0, Cache Flag will attempt to migrate any flags from the old `templatecaches_flagged` database table upon install.** Make sure that all flags are carried over, if not any missing flags will have to be re-added in Cache Flag's CP section.  
 
 ## Events
 
