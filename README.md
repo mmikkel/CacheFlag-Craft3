@@ -209,13 +209,13 @@ Beyond the `flagged` and `with elements` parameters, the `{% cacheflag %}` tag _
 
 ## Project Config and `allowAdminChanges`
 
-Cache Flag supports Project Config since v. 1.2.0. If you're upgrading from an earlier version, the relevant yaml files will be created as a migration when you upgrade.  
+Cache Flag supports [Project Config](https://docs.craftcms.com/v3/project-config.html) since v. 1.2.0 (Craft 3.5.0 or later only). **If you're upgrading from an earlier version of Cache Flag, the relevant `.yaml` files will be automatically created after upgrading and running migrations.**  
 
 Note that Cache Flag's CP section is inaccessible in environments where the  [`allowAdminChanges`](https://docs.craftcms.com/v3/config/config-settings.html#allowadminchanges) config setting is set to `false`.  
 
 ## Upgrading from Craft 2
 
-**Since v. 1.2.0, Cache Flag will automatically attempt to migrate flags from the old `templatecaches_flagged` database table after installation (or, after upgrading from an earlier version of Cache Flag for Craft 3).** 
+**Since v. 1.2.0, Cache Flag will attempt to automatically migrate flags from the old `templatecaches_flagged` database table after installation (or, after upgrading from an earlier version of Cache Flag for Craft 3).** 
 
 The migration only runs if    
 
