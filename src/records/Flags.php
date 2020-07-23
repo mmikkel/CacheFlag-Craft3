@@ -16,6 +16,8 @@ use Craft;
 use craft\db\ActiveRecord;
 
 /**
+ * @property int $id
+ *
  * @author    Mats Mikkel Rummelhoff
  * @package   CacheFlag
  * @since     1.0.0
