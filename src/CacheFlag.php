@@ -11,6 +11,7 @@
 namespace mmikkel\cacheflag;
 
 use Craft;
+use craft\base\Element;
 use craft\base\ElementInterface;
 use craft\base\Plugin;
 use craft\console\Application as ConsoleApplication;
@@ -88,6 +89,10 @@ class CacheFlag extends Plugin
             'templateCaches' => TemplateCachesService::class,
         ]);
 
+        $this->initProjectConfig();
+
+        $this->addElementEventListeners();
+
         // Register custom Twig extension
         Craft::$app->getView()->registerTwigExtension(new CacheFlagTwigExtension());
 
@@ -113,10 +118,6 @@ class CacheFlag extends Plugin
                 $variable->set('cacheFlagCp', CpVariable::class);
             }
         );
-
-        $this->initProjectConfig();
-
-        $this->addElementEventListeners();
 
         Craft::info(
             Craft::t(
@@ -175,11 +176,7 @@ class CacheFlag extends Plugin
             Elements::class,
             Elements::EVENT_AFTER_SAVE_ELEMENT,
             function (ElementEvent $event) {
-                $element = $event->element;
-                if (!$element || ElementHelper::isDraftOrRevision($element)) {
-                    return;
-                }
-                CacheFlag::$plugin->cacheFlag->invalidateFlaggedCachesByElement($element);
+                $this->_maybeInvalidateFlaggedCachesByElement($event->element);
             }
         );
 
@@ -188,11 +185,7 @@ class CacheFlag extends Plugin
             Elements::class,
             Elements::EVENT_BEFORE_DELETE_ELEMENT,
             function (ElementEvent $event) {
-                $element = $event->element;
-                if (!$element || ElementHelper::isDraftOrRevision($element)) {
-                    return;
-                }
-                CacheFlag::$plugin->cacheFlag->invalidateFlaggedCachesByElement($element);
+                $this->_maybeInvalidateFlaggedCachesByElement($event->element);
             }
         );
 
@@ -201,11 +194,7 @@ class CacheFlag extends Plugin
             Structures::class,
             Structures::EVENT_AFTER_MOVE_ELEMENT,
             function (MoveElementEvent $event) {
-                $element = $event->element;
-                if (!$element || ElementHelper::isDraftOrRevision($element)) {
-                    return;
-                }
-                CacheFlag::$plugin->cacheFlag->invalidateFlaggedCachesByElement($element);
+                $this->_maybeInvalidateFlaggedCachesByElement($event->element);
             }
         );
 
@@ -215,33 +204,37 @@ class CacheFlag extends Plugin
             Elements::EVENT_AFTER_PERFORM_ACTION,
             function (ElementActionEvent $event) {
 
-                /* @var ElementQueryInterface|null $criteria */
-                $criteria = $event->criteria;
-
-                if (!$criteria) {
+                /* @var ElementActionInterface|null $action */
+                $action = $event->action;
+                if ($action === null || \get_class($action) !== SetStatus::class) {
                     return;
                 }
 
-                /* @var ElementActionInterface|null $action */
-                $action = $event->action;
-
-                if (!$action || !\in_array(\get_class($action), [
-                        SetStatus::class,
-                    ])) {
+                /* @var ElementQueryInterface|null $criteria */
+                $criteria = $event->criteria;
+                if ($criteria === null) {
                     return;
                 }
 
                 /** @var ElementInterface[] $elements */
                 $elements = $criteria->all();
-
                 foreach ($elements as $element) {
-                    if (ElementHelper::isDraftOrRevision($element)) {
-                        continue;
-                    }
-                    CacheFlag::$plugin->cacheFlag->invalidateFlaggedCachesByElement($element);
+                    $this->_maybeInvalidateFlaggedCachesByElement($element);
                 }
             }
         );
+    }
+
+    /**
+     * @param ElementInterface|Element|null $element
+     */
+    private function _maybeInvalidateFlaggedCachesByElement($element)
+    {
+        /** @var Element $element */
+        if ($element === null || ElementHelper::isDraftOrRevision($element)) {
+            return;
+        }
+        CacheFlag::$plugin->cacheFlag->invalidateFlaggedCachesByElement($element);
     }
 
 }
