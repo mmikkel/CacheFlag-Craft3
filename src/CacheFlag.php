@@ -13,6 +13,7 @@ namespace mmikkel\cacheflag;
 use Craft;
 use craft\base\ElementInterface;
 use craft\base\Plugin;
+use craft\console\Application as ConsoleApplication;
 use craft\elements\actions\SetStatus;
 use craft\events\ElementEvent;
 use craft\events\ElementActionEvent;

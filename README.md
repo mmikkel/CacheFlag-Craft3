@@ -10,7 +10,7 @@ Cache Flag was originally designed to circumvent performance issues in Craft 2 a
 
 Craft 3.5 (due to release in August 2020) has a new template caching system with [a tag-based cache invalidation strategy](https://github.com/craftcms/cms/issues/1507#issuecomment-633147835). This should solve the performance issues that Cache Flag was initially designed to circumvent.  
 
-**If you're only using Cache Flag to avoid performance issues with the native `{% cache %}` tag, you probably don't need it on Craft 3.5.0 or later :)**  
+**If you're only using Cache Flag to avoid performance issues with the native `{% cache %}` tag, you probably don't need it after upgrading to Craft 3.5.0 or later :)**  
 
 That said, Cache Flag is fully compatible with Craft 3.5 and is still a valid alternative to the native `{% cache %}` tag, e.g. for automatic bulk cache invalidation or completely "cold" template caches.  
 
@@ -19,8 +19,10 @@ That said, Cache Flag is fully compatible with Craft 3.5 and is still a valid al
 * [Requirements and installation](#requirements-and-installation)  
 * [Using Cache Flag](#using-cache-flag)  
 * [Dynamic flags](#dynamic-flags)  
+* [Arbitrary flags](#arbitrary-flags)  
 * [Collecting element tags for automatic cache invalidation](#collecting-element-tags-for-automatic-cache-invalidation)  
 * [Cold caches](#cold-caches)  
+* [Clearing flagged caches](#invalidating-flagged-caches)
 * [Additional parameters](#additional-parameters)
 * [Project Config and `allowAdminChanges`](#project-config)  
 * [Upgrading from Craft 2](#upgrading-from-craft-2)  
@@ -120,6 +122,21 @@ Of course, it's possible to combine both standard and dynamic cache flags for a 
 {% endcacheflag %}
 ```
 
+## Arbitrary flags  
+
+The flags you add to your `{% cachetags %}` caches can be literally anything - and they don't have to be added to an element source (via Cache Flag's CP section).  
+
+A good use case for arbitrary flags is when you've got a cache that don't involve any elements, for example if you wanted to cache output dependent on an external API call or something else that is time-consuming to parse on every request, e.g. something like this:  
+
+```twig
+{% cacheflag flagged "somearbitraryflag" %}
+    {% set data = craft.somePlugin.doExpensiveApiCall() %}
+    ...
+{% endcacheflag %}
+```
+
+If you use arbitrary flags, you might want to read up on [how to invalidate caches using those flags](#invalidating-flagged-caches).  
+
 ## Collecting element tags for automatic cache invalidation
 
 Since Cache Flag 1.1.0 (Craft 3.5.0-RC1 or later), it's possible to collect element tags (in addition to your own flags) for automatic cache invalidation just like the native `{% cache %}` tag does.  
@@ -136,7 +153,7 @@ Note: It's also possible to omit the `flagged` parameter and only use `with elem
 
 ## Cold caches  
 
-If both `flagged` and `with elements` are omitted from a `{% cacheflag %}` tag, that cache will be completely "cold", and it will only be invalidated if/when it expires, or if a user manually invalidates it (or clears the entire data cache) via the Control Panel or the Craft CLI:  
+If both `flagged` and `with elements` are omitted from a `{% cacheflag %}` tag, that cache will be completely "cold", and it will only be invalidated if/when it expires, or if a user manually invalidates it (or clears the entire data cache) via the Control Panel or the Craft CLI (see also _[invalidating flagged caches](#invalidating-flagged-caches)_):  
 
 ```twig
 {% cacheflag for 360 days %}
@@ -145,6 +162,42 @@ If both `flagged` and `with elements` are omitted from a `{% cacheflag %}` tag, 
 ```
 
 **Tip:** If you're upgrading a Craft 2 site that uses the [Cold Cache plugin](https://straightupcraft.com/craft-plugins/cold-cache), this is one way to achive the same thing on Craft 3.  
+
+## Invalidating flagged caches
+
+Caches flagged with flags saved to one or multiple element sources or [dynamic flags](#dynamic-flags), your caches will be automatically invalidated.  
+
+Cold caches and caches using [arbitrary flags](#arbitrary-flags) must be invalidated manually or programmatically.  
+
+### Manual cache invalidation
+
+Flagged caches can be manually invalidated by  
+
+* Checking the "Flagged template caches" checkbox in the native Clear Caches utility in the Craft CP. This will invalidate _all_ flagged caches.  
+* Via Cache Flag's CP section
+* Hitting the `cache-flag/caches/invalidate` web controller with a GET or POST request. This controller invalidates _all_ flagged caches, unless a parameter `flags` (array of flags you want to clear) is present in the request.  
+* Running the CLI console command `cache-flag/caches/invalidate`. This command will invalidate _all_ flagged caches, unless you specify one or multiple flags (comma separated list):  
+
+        ./craft cache-flag/caches/invalidate news,images
+
+**Additionally, flushing Craft's data cache (via CLI or the Clear Caches CP utility) will _delete_ all flagged template caches.**  
+
+### Programmatic cache invalidation  
+
+```php
+
+use mmikkel\cacheflag\CacheFlag;
+
+// Invalidate all flagged caches
+CacheFlag::getInstance()->cacheFlag->invalidateAllFlaggedCaches();
+
+// Invalidate caches for a particular element
+CacheFlag::getInstance()->cacheFlag->invalidateFlaggedCachesByElement($entry);
+
+// Invalidate caches for one or several flags
+CacheFlag::getInstance()->cacheFlag->invalidateFlaggedCachesByFlags(['news', 'images']);
+
+```
 
 ## Additional parameters
 

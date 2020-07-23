@@ -40,11 +40,6 @@
     margin-right: 5px;
 }
 
-.cacheFlag-flags th,
-.cacheFlag-flags td {
-
-}
-
 .cacheFlag-flagsInput {
     width: 33.3333%;
     max-width: 250px;
@@ -71,14 +66,6 @@
 .cacheFlag-clearCachesByFlagsForm .submit,
 .cacheFlag-clearAllCachesForm .submit {
     background-color: #333F4D;
-}
-
-/*
-*  About page
-*
-*/
-.cacheFlag-aboutPage td.desc {
-    color: rgba(0, 0, 0, 0.5);
 }
 
 /*
