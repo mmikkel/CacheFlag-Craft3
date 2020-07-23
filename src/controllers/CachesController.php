@@ -41,6 +41,7 @@ class CachesController extends Controller
             }, []);
         }
 
+        /** @var array $flags */
         if (empty($flags)) {
             CacheFlag::getInstance()->cacheFlag->invalidateAllFlaggedCaches();
             return true;

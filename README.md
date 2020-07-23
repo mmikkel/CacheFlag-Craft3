@@ -12,7 +12,11 @@ Craft 3.5 (due to release in August 2020) has a new template caching system with
 
 **If you're only using Cache Flag to avoid performance issues with the native `{% cache %}` tag, you probably don't need it after upgrading to Craft 3.5.0 or later :)**  
 
-That said, Cache Flag is fully compatible with Craft 3.5 and is still a valid alternative to the native `{% cache %}` tag, e.g. for automatic bulk cache invalidation or completely "cold" template caches.  
+That said, Cache Flag is fully compatible with Craft 3.5 (it can even be combined w/ th native `{% cache %}` tag's automatic invalidation strategy) and is still a valid alternative to the native `{% cache %}` tag if you want to  
+
+* Do automatic or manual bulk template cache invalidation  
+* Cache arbitrary Twig output and implement your own invalidation strategies  
+* Have completely cold template caches  
 
 ## Table of contents  
 
@@ -63,7 +67,7 @@ _Here's how it looks in action:_
 
 **Note that multiple flags are separated using the pipe delimiter (`|`).**  
 
-**Tip:** In addition to the `flagged` parameter it's also possible to have Cache Flag clear caches automatically in the samee way the native `{% cache %}` tag does, using the new [`with elements`](#collecting-element-tags-for-automatic-cache-invalidation) directive.  
+**Tip:** In addition to the `flagged` parameter it's also possible to have Cache Flag clear caches automatically in the same way the native `{% cache %}` tag does, using the new [`with elements`](#collecting-element-tags-for-automatic-cache-invalidation) directive.  
 
 ### I'm going to need an example.  
 
@@ -124,9 +128,9 @@ Of course, it's possible to combine both standard and dynamic cache flags for a 
 
 ## Arbitrary flags  
 
-The flags you add to your `{% cachetags %}` caches can be literally anything - and they don't have to be added to an element source (via Cache Flag's CP section).  
+The flags you add to your `{% cachetags %}` caches can be literally anything - and they don't have to be added to an element source (or be dynamic).    
 
-A good use case for arbitrary flags is when you've got a cache that don't involve any elements, for example if you wanted to cache output dependent on an external API call or something else that is time-consuming to parse on every request, e.g. something like this:  
+A good use case for _arbitrary flags_ is when you've got a cache that don't involve any elements, for example if you wanted to cache output dependent on an external API call or something else that is time-consuming to parse on every request, e.g. something like this:  
 
 ```twig
 {% cacheflag flagged "somearbitraryflag" %}
@@ -135,7 +139,7 @@ A good use case for arbitrary flags is when you've got a cache that don't involv
 {% endcacheflag %}
 ```
 
-If you use arbitrary flags, you might want to read up on [how to invalidate caches using those flags](#invalidating-flagged-caches).  
+If you use arbitrary flags, keep in mind that there's nothing that will actually invalidate those caches automatically (they'll essentially be _cold_ caches, albeit flagged). Read up on [the different options available for invalidating these - and other - flagged caches here](#invalidating-flagged-caches).  
 
 ## Collecting element tags for automatic cache invalidation
 
@@ -207,11 +211,18 @@ Beyond the `flagged` and `with elements` parameters, the `{% cacheflag %}` tag _
 
 Cache Flag supports Project Config since v. 1.2.0. If you're upgrading from an earlier version, the relevant yaml files will be created as a migration when you upgrade.  
 
-Note that Cache Flag's CP section is inaccessible in environments where the  [`allowAdminChanges`](https://docs.craftcms.com/v3/config/config-settings.html#allowadminchanges) Craft config setting is set to `false`. Flagged template caches can be invalidated using the native Clear Caches utility tool, though.    
+Note that Cache Flag's CP section is inaccessible in environments where the  [`allowAdminChanges`](https://docs.craftcms.com/v3/config/config-settings.html#allowadminchanges) config setting is set to `false`.  
 
 ## Upgrading from Craft 2
 
-**Since v. 1.2.0, Cache Flag will attempt to migrate any flags from the old `templatecaches_flagged` database table upon install.** Make sure that all flags are carried over, if not any missing flags will have to be re-added in Cache Flag's CP section.  
+**Since v. 1.2.0, Cache Flag will automatically attempt to migrate flags from the old `templatecaches_flagged` database table after installation (or, after upgrading from an earlier version of Cache Flag for Craft 3).** 
+
+The migration only runs if    
+
+1. The old Craft 2 database table `templatecaches_flagged` is still in the database  
+2. There are no flags currently in the Craft 3 database table (`cacheflag_flags`)
+
+After the migration has completed, make sure that all flags have carried over. Any missing flags will have to be manually entered in Cache Flag's CP section (this can happen if there isn't parity between element source IDs in the Craft 2/3 database tables).    
 
 ## Events
 
