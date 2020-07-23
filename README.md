@@ -8,7 +8,7 @@ Cache Flag is a Craft CMS plugin that adds an alternative cache invalidation str
 
 Cache Flag was originally designed to circumvent performance issues in Craft 2 and 3 related to the element queries created by the native `{% cache %}` tag for automatic cache invalidation.  
 
-Craft 3.5 (due to release in August 2020) has a new template caching system with [a tag-based cache invalidation strategy](https://github.com/craftcms/cms/issues/1507#issuecomment-633147835). This should solve the performance issues that Cache Flag was initially designed to circumvent.  
+Craft 3.5 (due to release in August 2020) has a new template caching system with [a tag-based cache invalidation strategy](https://github.com/craftcms/cms/issues/1507#issuecomment-633147835). This should solve said performance issues, and makes Cache Flag redundant for its primary use case.    
 
 **If you're only using Cache Flag to avoid performance issues with the native `{% cache %}` tag, you probably don't need it after upgrading to Craft 3.5.0 or later :)**  
 
