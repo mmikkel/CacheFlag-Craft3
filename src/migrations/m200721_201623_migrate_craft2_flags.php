@@ -43,7 +43,7 @@ class m200721_201623_migrate_craft2_flags extends Migration
         }
 
         $craft2TableSchema = Craft::$app->db->schema->getTableSchema('{{%templatecaches_flags}}');
-        if (!$craft2TableSchema) {
+        if ($craft2TableSchema === null) {
             return;
         }
 

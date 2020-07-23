@@ -114,27 +114,27 @@ class CacheFlagService extends Component
         switch ($sourceColumn) {
             case 'sectionId':
                 $sourceKey = 'section';
-                $sourceValue = Db::uidById(Table::SECTIONS, $sourceValue);
+                $sourceValue = Db::uidById(Table::SECTIONS, (int)$sourceValue);
                 break;
             case 'categoryGroupId':
                 $sourceKey = 'categoryGroup';
-                $sourceValue = Db::uidById(Table::CATEGORYGROUPS, $sourceValue);
+                $sourceValue = Db::uidById(Table::CATEGORYGROUPS, (int)$sourceValue);
                 break;
             case 'tagGroupId':
                 $sourceKey = 'tagGroup';
-                $sourceValue = Db::uidById(Table::TAGGROUPS, $sourceValue);
+                $sourceValue = Db::uidById(Table::TAGGROUPS, (int)$sourceValue);
                 break;
             case 'userGroupId':
                 $sourceKey = 'userGroup';
-                $sourceValue = Db::uidById(Table::USERGROUPS, $sourceValue);
+                $sourceValue = Db::uidById(Table::USERGROUPS, (int)$sourceValue);
                 break;
             case 'volumeId':
                 $sourceKey = 'volume';
-                $sourceValue = Db::uidById(Table::VOLUMES, $sourceValue);
+                $sourceValue = Db::uidById(Table::VOLUMES, (int)$sourceValue);
                 break;
             case 'globalSetId':
                 $sourceKey = 'globalSet';
-                $sourceValue = Db::uidById(Table::GLOBALSETS, $sourceValue);
+                $sourceValue = Db::uidById(Table::GLOBALSETS, (int)$sourceValue);
                 break;
             case 'elementType':
                 $sourceKey = 'elementType';

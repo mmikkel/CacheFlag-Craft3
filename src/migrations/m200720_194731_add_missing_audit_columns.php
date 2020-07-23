@@ -47,8 +47,8 @@ class m200720_194731_add_missing_audit_columns extends Migration
         // Add missing UIDs to all rows in the flags table
         $rows = Flags::find()
             ->all();
-        /** @var Flags $row */
         foreach ($rows as $row) {
+            /** @var Flags $row */
             $row->dateCreated = $row->dateCreated ?? Db::prepareDateForDb(time());
             $row->uid = Db::uidById('{{%cacheflag_flags}}', (int)$row->id) ?? StringHelper::UUID();
             $row->save();
