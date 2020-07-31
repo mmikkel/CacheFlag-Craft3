@@ -26,9 +26,9 @@ That said, Cache Flag is fully compatible with Craft 3.5 (it can even be combine
 * [Arbitrary flags](#arbitrary-flags)  
 * [Collecting element tags for automatic cache invalidation](#collecting-element-tags-for-automatic-cache-invalidation)  
 * [Cold caches](#cold-caches)  
-* [Clearing flagged caches](#invalidating-flagged-caches)
+* [Invalidating flagged caches](#invalidating-flagged-caches)
 * [Additional parameters](#additional-parameters)
-* [Project Config and `allowAdminChanges`](#project-config)  
+* [Project Config](#project-config)  
 * [Upgrading from Craft 2](#upgrading-from-craft-2)  
 * [Events](#events)  
 
@@ -169,22 +169,27 @@ If both `flagged` and `with elements` are omitted from a `{% cacheflag %}` tag, 
 
 ## Invalidating flagged caches
 
-Caches flagged with flags saved to one or multiple element sources or [dynamic flags](#dynamic-flags), your caches will be automatically invalidated.  
+Cache Flag will automatically invalidate any caches with flags saved to one or multiple element sources in Cache Flag's CP section, and caches using [dynamic flags](#dynamic-flags). These caches are invalidated whenever relevant elements are saved, deleted, moved or changes status.  
 
-Cold caches and caches using [arbitrary flags](#arbitrary-flags) must be invalidated manually or programmatically.  
+Cold caches and caches using [arbitrary flags](#arbitrary-flags) must be invalidated manually or programmatically (see below).  
 
 ### Manual cache invalidation
 
-Flagged caches can be manually invalidated by  
+Flagged template caches can be manually invalidated by  
 
-* Checking the "Flagged template caches" checkbox in the native Clear Caches utility in the Craft CP. This will invalidate _all_ flagged caches.  
-* Via Cache Flag's CP section
-* Hitting the `cache-flag/caches/invalidate` web controller with a GET or POST request. This controller invalidates _all_ flagged caches, unless a parameter `flags` (array of flags you want to clear) is present in the request.  
-* Running the CLI console command `cache-flag/caches/invalidate`. This command will invalidate _all_ flagged caches, unless you specify one or multiple flags (comma separated list):  
+* Using the native Clear Caches utility in the Craft CP (check out the [CP Clear Cache plugin](https://plugins.craftcms.com/cp-clearcache) for easier access to this tool)  
+* Hitting the "Invalidate all flagged caches" button in Cache Flag's CP section (only available if `allowAdminChanges` is `true`, see [more info here](#project-config))  
+* Using the native CLI command `invalidate-tags/cacheflag`  
+* Using the native CLI command `invalidate-tags/template` (invalidates all template caches, including flagged ones)  
+* Using the native CLI command `invalidate-tags/all` (invalidates all caches, including template caches)  
 
-        ./craft cache-flag/caches/invalidate news,images
+Additionally, Cache Flag exposes its own `cache-flag/caches/invalidate` CLI command, that can be used if you want to clear flagged template caches for specific flags (this also works with [arbitrary flags](#arbitrary-flags)):  
 
-**Additionally, flushing Craft's data cache (via CLI or the Clear Caches CP utility) will _delete_ all flagged template caches.**  
+    ./craft cache-flag/caches/invalidate news,images,awesome
+    
+If you want to clear flagged caches over HTTP there's also a web controller action `cache-flag/caches/invalidate` which can be hit with a GET or POST request. This controller action will invalidate all flagged template caches, unless a parameter `flags` (string[]; array of flags) is present in the request.  
+
+Finally, flushing the data cache will *delete* all template caches, including flagged ones.  
 
 ### Programmatic cache invalidation  
 
