@@ -65,7 +65,7 @@ class TemplateCachesService extends Component
         // Make sure the cache was tagged w/ the same flags
         $flagTags = $this->_getTagsForFlags($flags);
         $cachedFlagTags = \array_filter($tags, function (string $tag) {
-            return \strpos($tag, 'cacheflag') === 0 || $tag === 'element';
+            return \strpos($tag, 'cacheflag') === 0 || $tag === 'element' || $tag === 'template';
         });
 
         if (\array_diff($flagTags, $cachedFlagTags) != \array_diff($cachedFlagTags, $flagTags)) {
@@ -205,7 +205,7 @@ class TemplateCachesService extends Component
      */
     private function _getTagsForFlags($flags, string $delimiter = '|'): array
     {
-        $tagsArray = ['cacheflag'];
+        $tagsArray = ['template', 'cacheflag'];
         if (\is_array($flags)) {
             $flags = \implode(',', \array_map(function ($flag) {
                 return \preg_replace('/\s+/', '', $flag);

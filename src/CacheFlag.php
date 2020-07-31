@@ -96,14 +96,14 @@ class CacheFlag extends Plugin
         // Register custom Twig extension
         Craft::$app->getView()->registerTwigExtension(new CacheFlagTwigExtension());
 
-        // Add option to the Clear Caches utility to invalidate all flagged caches
-        Event::on(ClearCaches::class, ClearCaches::EVENT_REGISTER_CACHE_OPTIONS,
+        // Add tag option to the Clear Caches utility to invalidate all flagged caches
+        Event::on(ClearCaches::class, ClearCaches::EVENT_REGISTER_TAG_OPTIONS,
             static function (RegisterCacheOptionsEvent $event) {
                 $event->options[] = [
                     'key' => 'cacheflag-flagged-caches',
                     'label' => Craft::t('cache-flag', 'Flagged template caches'),
-                    'action' => [CacheFlag::getInstance()->cacheFlag, 'invalidateAllFlaggedCaches'],
-                    'info' => Craft::t('cache-flag', 'All template caches flagged using Cache Flag'),
+                    'tag' => 'cacheflag',
+                    'info' => Craft::t('cache-flag', 'Template caches flagged using Cache Flag'),
                 ];
             }
         );
