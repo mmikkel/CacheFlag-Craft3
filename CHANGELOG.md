@@ -1,5 +1,11 @@
 # Cache Flag Changelog
 
+## 1.2.3 - 2020-08-21
+
+### Fixed
+
+- Fixes an SQL issue that could occur when applying Project Config changes  
+
 ## 1.2.2 - 2020-08-21  
 
 ### Fixed

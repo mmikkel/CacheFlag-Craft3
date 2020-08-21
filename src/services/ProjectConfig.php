@@ -29,56 +29,59 @@ class ProjectConfig extends Component
 
         $uid = $event->tokenMatches[0];
 
-        $id = (new Query())
+        $query = (new Query())
             ->select(['id'])
             ->from(Flags::tableName())
-            ->where(['uid' => $uid])
-            ->scalar();
+            ->where(['uid' => $uid]);
+
+        $source = \explode(':', $event->newValue['source']);
+        $sourceKey = $source[0] ?? null;
+        $sourceValue = $source[1] ?? null;
+
+        if (!$sourceKey || !$sourceValue) {
+            return;
+        }
+
+        switch ($sourceKey) {
+            case 'section':
+                $column = 'sectionId';
+                $value = (int)Db::idByUid(Table::SECTIONS, $sourceValue);
+                break;
+            case 'categoryGroup':
+                $column = 'categoryGroupId';
+                $value = (int)Db::idByUid(Table::CATEGORYGROUPS, $sourceValue);
+                break;
+            case 'tagGroup':
+                $column = 'tagGroupId';
+                $value = (int)Db::idByUid(Table::TAGGROUPS, $sourceValue);
+                break;
+            case 'userGroup':
+                $column = 'userGroupId';
+                $value = (int)Db::idByUid(Table::USERGROUPS, $sourceValue);
+                break;
+            case 'volume':
+                $column = 'volumeId';
+                $value = (int)Db::idByUid(Table::VOLUMES, $sourceValue);
+                break;
+            case 'globalSet':
+                $column = 'globalSetId';
+                $value = (int)Db::idByUid(Table::GLOBALSETS, $sourceValue);
+                break;
+            case 'elementType':
+                $column = 'elementType';
+                $value = $sourceValue;
+                break;
+            default:
+                return;
+        }
+
+        $query->orWhere([$column => $value]);
+
+        $id = $query->scalar();
 
         $isNew = empty($id);
 
         if ($isNew) {
-
-            $source = \explode(':', $event->newValue['source']);
-            $sourceKey = $source[0] ?? null;
-            $sourceValue = $source[1] ?? null;
-
-            if (!$sourceKey || !$sourceValue) {
-                return;
-            }
-
-            switch ($sourceKey) {
-                case 'section':
-                    $column = 'sectionId';
-                    $value = (int)Db::idByUid(Table::SECTIONS, $sourceValue);
-                    break;
-                case 'categoryGroup':
-                    $column = 'categoryGroupId';
-                    $value = (int)Db::idByUid(Table::CATEGORYGROUPS, $sourceValue);
-                    break;
-                case 'tagGroup':
-                    $column = 'tagGroupId';
-                    $value = (int)Db::idByUid(Table::TAGGROUPS, $sourceValue);
-                    break;
-                case 'userGroup':
-                    $column = 'userGroupId';
-                    $value = (int)Db::idByUid(Table::USERGROUPS, $sourceValue);
-                    break;
-                case 'volume':
-                    $column = 'volumeId';
-                    $value = (int)Db::idByUid(Table::VOLUMES, $sourceValue);
-                    break;
-                case 'globalSet':
-                    $column = 'globalSetId';
-                    $value = (int)Db::idByUid(Table::GLOBALSETS, $sourceValue);
-                    break;
-                case 'elementType':
-                    $column = 'elementType';
-                    $value = $sourceValue;
-                    break;
-                default:
-                    return;
-            }
 
             $flags = $event->newValue['flags'];
 
@@ -95,6 +98,7 @@ class ProjectConfig extends Component
             Craft::$app->db->createCommand()
                 ->update(Flags::tableName(), [
                     'flags' => $event->newValue['flags'],
+                    'uid' => $uid,
                 ], ['id' => $id])
                 ->execute();
         }
