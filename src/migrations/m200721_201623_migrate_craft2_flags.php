@@ -29,14 +29,6 @@ class m200721_201623_migrate_craft2_flags extends Migration
     public function safeUp()
     {
 
-        // Don't make the same config changes twice
-        $schemaVersion = Craft::$app->projectConfig
-            ->get('plugins.cache-flag.schemaVersion', true);
-
-        if (\version_compare($schemaVersion, '1.0.1', '>=')) {
-            return;
-        }
-
         if (!!Flags::find()->count()) {
             // There's already content in the Craft 3 table, so don't attempt to migrate anything
             return;

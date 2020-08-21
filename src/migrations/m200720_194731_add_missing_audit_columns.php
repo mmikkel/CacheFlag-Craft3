@@ -23,13 +23,6 @@ class m200720_194731_add_missing_audit_columns extends Migration
      */
     public function safeUp()
     {
-        // Don't make the same config changes twice
-        $schemaVersion = Craft::$app->projectConfig
-            ->get('plugins.cache-flag.schemaVersion', true);
-
-        if (\version_compare($schemaVersion, '1.0.1', '>=')) {
-            return;
-        }
 
         $tableSchema = Craft::$app->db->schema->getTableSchema('{{%cacheflag_flags}}');
 
@@ -44,7 +37,7 @@ class m200720_194731_add_missing_audit_columns extends Migration
             $this->addColumn('{{%cacheflag_flags}}', 'uid', $this->uid());
         }
 
-        // Add missing UIDs to all rows in the flags table
+        // If any rows in the flags table are missing UIDs, add them
         $rows = Flags::find()
             ->all();
         foreach ($rows as $row) {
