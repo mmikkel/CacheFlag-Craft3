@@ -28,10 +28,10 @@ class m200720_194731_add_missing_audit_columns extends Migration
 
         // Make sure our audit columns exist
         if (!isset($tableSchema->columns['dateCreated'])) {
-            $this->addColumn('{{%cacheflag_flags}}', 'dateCreated', $this->dateTime()->notNull());
+            $this->addColumn('{{%cacheflag_flags}}', 'dateCreated', $this->dateTime()->notNull()->defaultExpression('NOW()'));
         }
         if (!isset($tableSchema->columns['dateUpdated'])) {
-            $this->addColumn('{{%cacheflag_flags}}', 'dateUpdated', $this->dateTime()->notNull());
+            $this->addColumn('{{%cacheflag_flags}}', 'dateUpdated', $this->dateTime()->notNull()->defaultExpression('NOW()'));
         }
         if (!isset($tableSchema->columns['uid'])) {
             $this->addColumn('{{%cacheflag_flags}}', 'uid', $this->uid());
@@ -42,7 +42,6 @@ class m200720_194731_add_missing_audit_columns extends Migration
             ->all();
         foreach ($rows as $row) {
             /** @var Flags $row */
-            $row->dateCreated = $row->dateCreated ?? Db::prepareDateForDb(time());
             $row->uid = Db::uidById('{{%cacheflag_flags}}', (int)$row->id) ?? StringHelper::UUID();
             $row->save();
         }
