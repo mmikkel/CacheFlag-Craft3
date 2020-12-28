@@ -1,6 +1,6 @@
 # Cache Flag Changelog
 
-## Unreleased  
+## 1.2.4 - 2020-12-28    
 
 ### Fixed  
 - Fixes a migration SQL issue. Fixes #12  
