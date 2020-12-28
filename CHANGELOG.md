@@ -3,7 +3,10 @@
 ## Unreleased  
 
 ### Fixed  
-- Fixes a migration SQL issue  
+- Fixes a migration SQL issue. Fixes #12  
+
+### Changed  
+- Cache Flag no longer triggers the deprecated `EVENT_BEFORE_DELETE_FLAGGED_CACHES` and `EVENT_AFTER_DELETE_FLAGGED_CACHES` events. Fixes #13  
 
 ## 1.2.3 - 2020-08-21
 

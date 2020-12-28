@@ -317,15 +317,6 @@ class CacheFlagService extends Component
             return false;
         }
 
-        // Fire a 'beforeDeleteFlaggedCaches' event
-        if ($this->hasEventHandlers(/** @scrutinizer ignore-deprecated */ self::EVENT_BEFORE_DELETE_FLAGGED_CACHES)) {
-            Craft::$app->getDeprecator()->log('CacheFlagService::EVENT_BEFORE_DELETE_FLAGGED_CACHES', 'The `EVENT_BEFORE_DELETE_FLAGGED_CACHES` event has been deprecated. Use \mmikkel\cacheflag\services\CacheFlagService::EVENT_BEFORE_INVALIDATE_FLAGGED_CACHES instead.');
-            $this->trigger(/** @scrutinizer ignore-deprecated */ self::EVENT_BEFORE_DELETE_FLAGGED_CACHES, /** @scrutinizer ignore-deprecated */ new BeforeDeleteFlaggedTemplateCachesEvent([
-                'cacheIds' => [],
-                'flags' => $flags,
-            ]));
-        }
-
         // Fire a `beforeInvalidateFlaggedCaches` event
         if ($this->hasEventHandlers(self::EVENT_BEFORE_INVALIDATE_FLAGGED_CACHES)) {
             $this->trigger(self::EVENT_BEFORE_INVALIDATE_FLAGGED_CACHES, new FlaggedTemplateCachesEvent([
@@ -338,15 +329,6 @@ class CacheFlagService extends Component
         }, $flags);
 
         TagDependency::invalidate(Craft::$app->getCache(), $flagTags);
-
-        // Fire a 'afterDeleteFlaggedCaches' event
-        if ($this->hasEventHandlers(/** @scrutinizer ignore-deprecated */ self::EVENT_AFTER_DELETE_FLAGGED_CACHES)) {
-            Craft::$app->getDeprecator()->log('CacheFlagService::EVENT_AFTER_DELETE_FLAGGED_CACHES', 'The `EVENT_AFTER_DELETE_FLAGGED_CACHES` event has been deprecated. Use \mmikkel\cacheflag\services\CacheFlagService::EVENT_AFTER_INVALIDATE_FLAGGED_CACHES instead.');
-            $this->trigger(/** @scrutinizer ignore-deprecated */ self::EVENT_AFTER_DELETE_FLAGGED_CACHES, /** @scrutinizer ignore-deprecated */ new AfterDeleteFlaggedTemplateCachesEvent([
-                'cacheIds' => [],
-                'flags' => $flags,
-            ]));
-        }
 
         // Fire a 'afterInvalidateFlaggedCaches' event
         if ($this->hasEventHandlers(self::EVENT_AFTER_INVALIDATE_FLAGGED_CACHES)) {
