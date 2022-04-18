@@ -2,7 +2,7 @@
     "name": "mmikkel/cache-flag",
     "description": "Cold template caches that can be flagged and automatically invalidated.",
     "type": "craft-plugin",
-    "version": "1.2.4",
+    "version": "1.3.0",
     "keywords": [
         "craft",
         "cms",
@@ -22,7 +22,19 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^3.5.0-RC5"
+        "craftcms/cms": "^3.7.0|^4.0.0-beta.4",
+        "php": "^7.2.5|^8.0"
+    },
+    "require-dev": {
+        "craftcms/rector": "dev-main"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true,
+            "craftcms/plugin-installer": true
+        }
     },
     "autoload": {
         "psr-4": {
@@ -32,6 +44,7 @@
     "extra": {
         "name": "Cache Flag",
         "handle": "cache-flag",
+        "schemaVersion": "1.0.1",
         "hasCpSettings": false,
         "hasCpSection": true,
         "changelogUrl": "https://raw.githubusercontent.com/mmikkel/CacheFlag-Craft3/master/CHANGELOG.md",

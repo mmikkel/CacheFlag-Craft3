@@ -1,22 +1,20 @@
-# Cache Flag plugin for Craft CMS 3
+# Cache Flag plugin for Craft CMS
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mmikkel/CacheFlag-Craft3/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mmikkel/CacheFlag-Craft3/?branch=master)
 
 Cache Flag is a Craft CMS plugin that adds an alternative cache invalidation strategy to template caches, using manually defined keywords ("flags").  
 
-## TL;DR (and a note re: Craft 3.5)   
+## Why does this plugin exist?  
 
-Cache Flag was originally designed to circumvent performance issues in Craft 2 and 3 related to the element queries created by the native `{% cache %}` tag for automatic cache invalidation.  
+Cache Flag was originally designed to circumvent common performance issues with the native `{% cache %}` tag's element query based invalidation strategy.  
 
-Craft 3.5 (due to release in August 2020) has a new template caching system with [a tag-based cache invalidation strategy](https://github.com/craftcms/cms/issues/1507#issuecomment-633147835). This should solve said performance issues, and makes Cache Flag redundant for its primary use case.    
+Since Craft 3.5.0, said performance issues have been solved in core, making Cache Flag redundant for its primary use case. **If you were previously using Cache Flag only to avoid performance issues with `{% cache %}`, you probably don't need it anymore!**  
 
-**If you're only using Cache Flag to avoid performance issues with the native `{% cache %}` tag, you probably don't need it after upgrading to Craft 3.5.0 or later :)**  
+However, Cache Flag is still a valid alternative to the native `{% cache %}` tag if you want to  
 
-That said, Cache Flag is fully compatible with Craft 3.5 (it can even be combined w/ th native `{% cache %}` tag's automatic invalidation strategy) and is still a valid alternative to the native `{% cache %}` tag if you want to  
-
-* Do automatic or manual bulk template cache invalidation  
-* Cache arbitrary Twig output and implement your own invalidation strategies  
-* Have completely cold template caches  
+* Implement automatic or manual bulk template cache invalidation (optionally, in combination with Craft's native element-based cache invalidation)  
+* Cache arbitrary HTML output and implement your own invalidation strategies for it  
+* Have completely cold template caches (like the [Cold Cache plugin](https://github.com/pixelandtonic/ColdCache), which is not available for Craft 3 or 4)  
 
 ## Table of contents  
 
@@ -34,7 +32,9 @@ That said, Cache Flag is fully compatible with Craft 3.5 (it can even be combine
 
 ## Requirements and installation
 
-**This plugin requires Craft CMS 3.5.0-RC1 or later. Craft installs using Craft CMS 3.4.x or below should install Cache Flag v. 1.0.4:** `composer require mmikkel/cache-flag:1.0.4`  
+**This plugin requires Craft CMS 3.7.0, 4.0.0-beta.4 or later.**  
+
+Craft installs using Craft CMS 3.4.x or below should install Cache Flag v. 1.0.4:** `composer require mmikkel/cache-flag:1.0.4`  
 
 To install the plugin, follow these instructions:
 
@@ -220,12 +220,12 @@ Note that Cache Flag's CP section is inaccessible in environments where the  [`a
 
 ## Upgrading from Craft 2
 
-**Since v. 1.2.0, Cache Flag will attempt to automatically migrate flags from the old `templatecaches_flagged` database table after installation (or, after upgrading from an earlier version of Cache Flag for Craft 3).** 
+Cache Flag will attempt to automatically migrate flags from the old `templatecaches_flagged` Craft 2 database table after installation (or, after upgrading from an earlier version of Cache Flag for Craft 3).** 
 
 The migration only runs if    
 
 1. The old Craft 2 database table `templatecaches_flagged` is still in the database  
-2. There are no flags currently in the Craft 3 database table (`cacheflag_flags`)
+2. The new Craft 3 database table (`cacheflag_flags`) has no rows  
 
 After the migration has completed, make sure that all flags have carried over. Any missing flags will have to be manually entered in Cache Flag's CP section (this can happen if there isn't parity between element source IDs in the Craft 2/3 database tables).    
 

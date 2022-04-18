@@ -63,14 +63,6 @@ class CacheFlag extends Plugin
      */
     public static $plugin;
 
-    // Public Properties
-    // =========================================================================
-
-    /**
-     * @var string
-     */
-    public $schemaVersion = '1.0.1';
-
     // Public Methods
     // =========================================================================
 
@@ -130,7 +122,7 @@ class CacheFlag extends Plugin
     }
 
     /** @inheritDoc */
-    public function getCpNavItem()
+    public function getCpNavItem(): ?array
     {
         if (!Craft::$app->getConfig()->getGeneral()->allowAdminChanges) {
             return null;

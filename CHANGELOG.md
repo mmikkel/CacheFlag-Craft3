@@ -1,5 +1,12 @@
 # Cache Flag Changelog
 
+## Unreleased
+### Added  
+- Adds Craft 4.0 compatibility
+
+### Changed  
+- Updated plugin icon
+
 ## 1.2.4 - 2020-12-28    
 
 ### Fixed  
