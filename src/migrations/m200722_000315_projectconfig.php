@@ -23,7 +23,7 @@ class m200722_000315_projectconfig extends Migration
     public function safeUp()
     {
         // Don't make the same config changes twice
-        $schemaVersion = Craft::$app->projectConfig
+        $schemaVersion = Craft::$app->getProjectConfig()
             ->get('plugins.cache-flag.schemaVersion', true);
 
         if (\version_compare($schemaVersion, '1.0.1', '>=')) {
@@ -73,7 +73,7 @@ class m200722_000315_projectconfig extends Migration
 
             $path = "cacheFlags.{$row['uid']}";
 
-            Craft::$app->projectConfig->set($path, [
+            Craft::$app->getProjectConfig()->set($path, [
                 'source' => $source,
                 'flags' => $row['flags'],
             ]);

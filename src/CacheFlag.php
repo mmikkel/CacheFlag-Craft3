@@ -141,7 +141,7 @@ class CacheFlag extends Plugin
             [$this->projectConfig, 'onProjectConfigRebuild']
         );
 
-        Craft::$app->projectConfig
+        Craft::$app->getProjectConfig()
             ->onAdd('cacheFlags.{uid}', [$this->projectConfig, 'onProjectConfigChange'])
             ->onUpdate('cacheFlags.{uid}', [$this->projectConfig, 'onProjectConfigChange'])
             ->onRemove('cacheFlags.{uid}', [$this->projectConfig, 'onProjectConfigDelete']);

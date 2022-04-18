@@ -149,7 +149,7 @@ class CacheFlagService extends Component
 
         // Save it to the project config
         $path = "cacheFlags.{$uid}";
-        Craft::$app->projectConfig->set($path, [
+        Craft::$app->getProjectConfig()->set($path, [
             'source' => "$sourceKey:$sourceValue",
             'flags' => $flags,
         ]);
@@ -176,7 +176,7 @@ class CacheFlagService extends Component
 
         // Remove it from the project config
         $path = "cacheFlags.{$uid}";
-        Craft::$app->projectConfig->remove($path);
+        Craft::$app->getProjectConfig()->remove($path);
     }
 
     /**
