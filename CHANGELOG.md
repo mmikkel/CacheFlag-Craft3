@@ -1,6 +1,6 @@
 # Cache Flag Changelog
 
-## Unreleased
+## 1.3.0 - 2022-04-18
 ### Added  
 - Adds Craft 4.0 compatibility
 

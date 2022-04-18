@@ -199,7 +199,6 @@ class DefaultController extends Controller
             'Those are the second biggest flags I\'ve ever seen!',
             'Put a flag on it.',
             'No worries, your flags are totally saved.',
-            'I just can\'t believe Cache Flag is finally running on Craft 3',
             'Current state: flags saved.',
             'Mhmm, yummy flags been saved.',
             'Much flags. So saved.',
@@ -218,7 +217,6 @@ class DefaultController extends Controller
             'Oh man, just wait until people see these flags',
             'Not gonna lie. Those are some fine flags.',
             'Your flags are safe and sound.',
-            'That templatecaches table won\'t know what hit it!',
             'Tweet it out?',
         ];
         return $messages[\array_rand($messages)];
