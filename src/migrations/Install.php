@@ -47,6 +47,9 @@ class Install extends Migration
             $this->insertDefaultData();
         }
 
+        // Remove the old "cacheflag_flagged" table if it exists
+        $this->dropTableIfExists('{{%cacheflag_flagged}}');
+
         return true;
     }
 

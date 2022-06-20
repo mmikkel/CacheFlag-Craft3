@@ -1,5 +1,12 @@
 # Cache Flag Changelog
 
+## 1.3.1 - 2022-06-20
+
+> {warning} Prior to Craft 3.5.0, Cache Flag used a database table called `cacheflag_flagged` to store references to template caches in the `templatecaches` database table. **If present, this table will cause a migration error when upgrading to Craft 4.** To avoid the issue, make sure to upgrade to Cache Flag 1.3.1 or later **before** upgrading the site to Craft 4. _Note that this only applies to sites that were initially running Craft 3.4.x or earlier (and had Cache Flag v. 1.0.4 or earlier installed at that time)._  
+
+### Fixed  
+- CacheFlag will now delete the old `cacheflag_flagged` database table upon installation or update, preventing a migration error when upgrading sites to Craft 4.  
+
 ## 1.3.0 - 2022-04-18
 ### Added  
 - Adds Craft 4.0 compatibility
