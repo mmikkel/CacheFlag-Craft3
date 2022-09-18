@@ -2,7 +2,7 @@
     "name": "mmikkel/cache-flag",
     "description": "Cold template caches that can be flagged and automatically invalidated.",
     "type": "craft-plugin",
-    "version": "1.3.1",
+    "version": "1.3.2",
     "keywords": [
         "craft",
         "cms",
