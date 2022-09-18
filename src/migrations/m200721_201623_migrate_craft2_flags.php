@@ -13,10 +13,12 @@ use craft\elements\GlobalSet;
 use craft\elements\MatrixBlock;
 use craft\elements\Tag;
 use craft\elements\User;
+use craft\helpers\Db;
 use mmikkel\cacheflag\records\Flags;
 
 /**
  * Class m200721_201623_migrate_craft2_flags
+ *
  * @package mmikkel\cacheflag\migrations
  * @since 1.2.0
  */
@@ -29,7 +31,7 @@ class m200721_201623_migrate_craft2_flags extends Migration
     public function safeUp()
     {
 
-        if (!!Flags::find()->count()) {
+        if ((bool)Flags::find()->count()) {
             // There's already content in the Craft 3 table, so don't attempt to migrate anything
             return;
         }
@@ -79,6 +81,7 @@ class m200721_201623_migrate_craft2_flags extends Migration
         $elementTypeRows = (clone $baseQuery)
             ->where('elementType IS NOT NULL')
             ->all();
+
         foreach ($elementTypeRows as $elementTypeRow) {
             $elementType = $elementTypeRow['elementType'];
             switch ($elementType) {
@@ -113,14 +116,22 @@ class m200721_201623_migrate_craft2_flags extends Migration
             $rowsToInsert[] = $elementTypeRow;
         }
 
-        if (!empty($rowsToInsert)) {
-            $this
-                ->batchInsert(
-                    '{{%cacheflag_flags}}',
-                    ['flags', 'sectionId', 'categoryGroupId', 'tagGroupId', 'userGroupId', 'volumeId', 'globalSetId', 'elementType', 'dateCreated', 'dateUpdated', 'uid'],
-                    $rowsToInsert,
-                    false
-                );
+        foreach ($rowsToInsert as $rowToInsert) {
+            if (empty($rowToInsert['flags'])) {
+                continue;
+            }
+            $this->insert('{{%cacheflag_flags}}', [
+                'flags' => $rowToInsert['flags'],
+                'sectionId' => $rowToInsert['sectionId'] ?? null,
+                'categoryGroupId' => $rowToInsert['categoryGroupId'] ?? null,
+                'tagGroupId' => $rowToInsert['tagGroupId'] ?? null,
+                'userGroupId' => $rowToInsert['userGroupId'] ?? null,
+                'volumeId' => $rowToInsert['volumeId'] ?? null,
+                'globalSetId' => $rowToInsert['globalSetId'] ?? null,
+                'elementType' => $rowToInsert['elementType'] ?? null,
+                'dateCreated' => !empty($rowToInsert['dateCreated']) ? Db::prepareDateForDb($rowToInsert['dateCreated']) : null,
+                'uid' => $rowToInsert['uid'] ?? null,
+            ]);
         }
 
         // Delete the Craft 2 table
