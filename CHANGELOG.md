@@ -1,5 +1,9 @@
 # Cache Flag Changelog
 
+## 1.3.3 - 2023-02-11
+### Fixed
+- Fixed a PHP exception that would occur when invalidating flagged caches via the `caches/invalidate` HTTP controller action, on Craft 4. Fixes #19
+
 ## 1.3.2 - 2022-09-18
 ### Fixed 
 - Fixed an issue that could occur when upgrading from Craft 2 to Craft 3.  
