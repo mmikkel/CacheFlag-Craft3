@@ -16,8 +16,11 @@ use mmikkel\cacheflag\CacheFlag;
 class CachesController extends Controller
 {
 
-    /** @var bool */
-    public $allowAnonymous = true;
+    public function init(): void
+    {
+        $this->allowAnonymous = true;
+        parent::init();
+    }
 
     /**
      * Invalidate all flagged caches, or caches flagged with one or several particular flags
