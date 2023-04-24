@@ -1,6 +1,6 @@
 # Cache Flag Changelog
 
-## Unreleased
+## 1.3.4 - 2023-04-24
 ### Fixed 
 - Fixed a PHP exception that could occur when saving or deleting nested elements with invalid owner IDs. #21
 
