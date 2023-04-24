@@ -1,5 +1,9 @@
 # Cache Flag Changelog
 
+## Unreleased
+### Fixed 
+- Fixed a PHP exception that could occur when saving or deleting nested elements with invalid owner IDs. #21
+
 ## 1.3.3 - 2023-02-11
 ### Fixed
 - Fixed a PHP exception that would occur when invalidating flagged caches via the `caches/invalidate` HTTP controller action, on Craft 4. Fixes #19

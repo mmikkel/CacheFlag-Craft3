@@ -222,9 +222,18 @@ class CacheFlag extends Plugin
      */
     private function _maybeInvalidateFlaggedCachesByElement($element)
     {
-        /** @var Element $element */
-        if ($element === null || ElementHelper::isDraftOrRevision($element)) {
+        if (!$element instanceof ElementInterface) {
             return;
+        }
+        /** @var Element $element */
+        // This try/catch is introduced to mitigate an edge case where a nested element could have an invalid (deleted) owner ID.
+        // See https://github.com/mmikkel/CacheFlag-Craft3/issues/21
+        try {
+            if (ElementHelper::isDraftOrRevision($element)) {
+                return;
+            }
+        } catch (\Throwable $e) {
+            // We don't care about handling this exception
         }
         CacheFlag::$plugin->cacheFlag->invalidateFlaggedCachesByElement($element);
     }
