@@ -1,5 +1,9 @@
 # Cache Flag Changelog
 
+## 1.4.0 - 2023-07-04
+### Changed
+- The Cache Flag CP section is now available in environments where admin changes are disallowed (saving flags isn't possible unless `allowAdminChanges` is set to `true`, but invalidating flagged caches is)  
+
 ## 1.3.4 - 2023-04-24
 ### Fixed 
 - Fixed a PHP exception that could occur when saving or deleting nested elements with invalid owner IDs. #21

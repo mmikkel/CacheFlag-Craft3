@@ -14,7 +14,9 @@ use mmikkel\cacheflag\CacheFlag;
 
 use Craft;
 use craft\web\Controller;
+
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 
 /**
  * @author    Mats Mikkel Rummelhoff
@@ -36,6 +38,10 @@ class DefaultController extends Controller
     {
         $this->requirePostRequest();
         $this->requireAcceptsJson();
+
+        if (!Craft::$app->getConfig()->getGeneral()->allowAdminChanges) {
+            throw new ForbiddenHttpException('Administrative changes are disallowed in this environment.');
+        }
 
         $params = Craft::$app->getRequest()->getBodyParams();
         $cacheFlags = $params['cacheflags'] ?? null;

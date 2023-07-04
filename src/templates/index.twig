@@ -6,12 +6,13 @@
 {% set sources = craft.cacheFlagCp.getSources() %}
 {% set allFlags = craft.cacheFlagCp.getAllFlags() %}
 
+{% set allowAdminChanges = craft.app.getConfig().getGeneral().allowAdminChanges %}
+
 {% set content %}
 
     <div class="cacheFlag-flags">
 
-        {% if craft.app.getConfig().getGeneral().allowAdminChanges %}
-
+        {% if allowAdminChanges %}
             <div class="cacheFlag-header">
                 <div class="readable">
                     <blockquote class="note tip">
@@ -21,31 +22,40 @@
                     </blockquote>
                 </div>
             </div>
+        {% endif %}
 
-            <form class="cacheFlag-form" method="post" accept-charset="UTF-8" data-saveshortcut data-csrf-name="{{ craft.app.config.general.csrfTokenName }}" data-csrf-token="{{ craft.app.request.csrfToken }}">
+        {% tag (allowAdminChanges ? 'form' : 'div') with {
+            class: 'cacheFlag-form',
+            method: allowAdminChanges ? 'post' : false,
+            'accept-charset': allowAdminChanges ? 'UTF-8' : false,
+            'data-saveshortcut': allowAdminChanges ? true : false,
+            'data-csrf-name': craft.app.config.general.csrfTokenName,
+            'data-csrf-token': craft.app.request.csrfToken
+        } %}
 
+            {% if allowAdminChanges %}
                 {{ csrfInput() }}
-
                 <input type="hidden" name="action" value="cache-flag/default/save-flags"/>
                 <input type="hidden" name="cacheflags" value=""/>
+            {% endif %}
 
-                {% for sourceGroup in sources %}
+            {% for sourceGroup in sources %}
 
-                    {% set sourceGroupSources = sourceGroup.sources %}
+                {% set sourceGroupSources = sourceGroup.sources %}
 
-                    {% if sourceGroupSources|length %}
+                {% if sourceGroupSources|length %}
 
-                        <h3 class="cacheFlag-targetTitle">{{ sourceGroup.name }}</h3>
+                    <h3 class="cacheFlag-targetTitle">{{ sourceGroup.name }}</h3>
 
-                        <table id="cacheFlag-{{ sourceGroup.name|snake }}" class="data fullwidth collapsible cacheFlag-table">
+                    <table id="cacheFlag-{{ sourceGroup.name|snake }}" class="data fullwidth collapsible cacheFlag-table">
 
-                            <thead class="cacheFlag-tableHeader">
-                                <th scope="col">{{ 'Name'|t('app') }}</th>
-                                <th scope="col">{{ 'Flags'|t('cache-flag') }}</th>
-                                <th scope="col"></th>
-                            </thead>
+                        <thead class="cacheFlag-tableHeader">
+                            <th scope="col">{{ 'Name'|t('app') }}</th>
+                            <th scope="col">{{ 'Flags'|t('cache-flag') }}</th>
+                            <th scope="col"></th>
+                        </thead>
 
-                            <tbody class="cacheFlag-tableBody">
+                        <tbody class="cacheFlag-tableBody">
 
                             {% for source in sourceGroupSources %}
 
@@ -72,6 +82,7 @@
                                                autocorrect="off"
                                                autocapitalize="off"
                                                spellcheck="false"
+                                                {% if not allowAdminChanges %} readonly{% endif %}
                                         />
 
                                     </td>
@@ -83,22 +94,22 @@
                                 </tr>
 
                             {% endfor %}
-                            </tbody>
-                        </table>
+                        </tbody>
 
-                    {% endif %}
+                    </table>
 
-                {% endfor %}
+                {% endif %}
 
+            {% endfor %}
+
+            {% if allowAdminChanges %}
                 <input type="submit" class="cacheFlag-inputSubmit btn submit" value="{{ 'Save flags'|t('cache-flag') }}"/>
-
                 <div class="spinner hidden"></div>
+            {% endif %}
 
-            </form>
+        {% endtag %}
 
-            <hr/>
-
-        {% endif %}
+        <hr/>
 
         <section aria-labelledby="{{ 'General'|t('cache-flag') }}">
             <form method="post" accept-charset="UTF-8" class="cacheFlag-clearAllCachesForm">

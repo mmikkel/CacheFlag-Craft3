@@ -124,9 +124,6 @@ class CacheFlag extends Plugin
     /** @inheritDoc */
     public function getCpNavItem(): ?array
     {
-        if (!Craft::$app->getConfig()->getGeneral()->allowAdminChanges) {
-            return null;
-        }
         return parent::getCpNavItem();
     }
 
