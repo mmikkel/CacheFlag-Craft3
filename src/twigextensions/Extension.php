@@ -1,17 +1,6 @@
 <?php
-/**
- * Cache Flag plugin for Craft CMS 3.x
- *
- * Flag and clear template caches.
- *
- * @link      https://vaersaagod.no
- * @copyright Copyright (c) 2018 Mats Mikkel Rummelhoff
- */
 
 namespace mmikkel\cacheflag\twigextensions;
-
-use mmikkel\cacheflag\CacheFlag;
-use mmikkel\cacheflag\twigextensions\CacheFlagTokenParser;
 
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -31,7 +20,7 @@ class Extension extends AbstractExtension
     /**
      * @inheritdoc
      */
-    public function getName()
+    public function getName(): string
     {
         return 'CacheFlag';
     }
@@ -39,7 +28,7 @@ class Extension extends AbstractExtension
     /**
      * @inheritdoc
      */
-    public function getFilters()
+    public function getFilters(): array
     {
         return \array_filter([
             Craft::$app->getRequest()->getIsCpRequest() ? new TwigFilter('cacheFlagUnCamelCase', [$this, 'cacheFlagUnCamelCaseFilter']) : null,
@@ -61,17 +50,17 @@ class Extension extends AbstractExtension
      *
      * @return string
      */
-    public function cacheFlagUnCamelCaseFilter($value = null): string
+    public function cacheFlagUnCamelCaseFilter(?string $value = null): string
     {
-        if (!$value) {
+        if (empty($value)) {
             return '';
         }
-        if (\preg_match('/[A-Z]/', $value) === 0) {
+        if (preg_match('/[A-Z]/', $value) === 0) {
             return $value;
         }
         $pattern = '/([a-z])([A-Z])/';
-        $r = \strtolower(\preg_replace_callback($pattern, function ($a) {
-            return $a[1] . ' ' . \strtolower($a[2]);
+        $r = strtolower(preg_replace_callback($pattern, function ($a) {
+            return $a[1] . ' ' . strtolower($a[2]);
         }, $value));
         return $r;
     }

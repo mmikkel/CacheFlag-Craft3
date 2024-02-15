@@ -1,6 +1,5 @@
 <?php
 
-
 namespace mmikkel\cacheflag\controllers;
 
 use Craft;
@@ -16,11 +15,8 @@ use mmikkel\cacheflag\CacheFlag;
 class CachesController extends Controller
 {
 
-    public function init(): void
-    {
-        $this->allowAnonymous = true;
-        parent::init();
-    }
+    /** @var array|bool|int */
+    public array|bool|int $allowAnonymous = self::ALLOW_ANONYMOUS_OFFLINE;
 
     /**
      * Invalidate all flagged caches, or caches flagged with one or several particular flags

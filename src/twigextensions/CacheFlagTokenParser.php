@@ -1,16 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: mmikkel
- * Date: 14/07/2018
- * Time: 15:43
- */
 
 namespace mmikkel\cacheflag\twigextensions;
-
-use mmikkel\cacheflag\twigextensions\CacheFlagNode;
-
-use Craft;
 
 use Twig\Parser;
 use Twig\Token;

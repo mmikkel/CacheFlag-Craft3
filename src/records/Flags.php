@@ -10,9 +10,6 @@
 
 namespace mmikkel\cacheflag\records;
 
-use mmikkel\cacheflag\CacheFlag;
-
-use Craft;
 use craft\db\ActiveRecord;
 
 /**
@@ -26,28 +23,28 @@ class Flags extends ActiveRecord
 {
 
     /** @var string|null */
-    public $flags;
+    public ?string $flags;
 
     /** @var int|null */
-    public $sectionId;
+    public ?int $sectionId;
 
     /** @var int|null */
-    public $categoryGroupId;
+    public ?int $categoryGroupId;
 
     /** @var int|null */
-    public $tagGroupId;
+    public ?int $tagGroupId;
 
     /** @var int|null */
-    public $userGroupId;
+    public ?int $userGroupId;
 
     /** @var int|null */
-    public $volumeId;
+    public ?int $volumeId;
 
     /** @var int|null */
-    public $globalSetId;
+    public ?int $globalSetId;
 
     /** @var string|null */
-    public $elementType;
+    public ?string $elementType;
 
     // Public Static Methods
     // =========================================================================
@@ -55,7 +52,7 @@ class Flags extends ActiveRecord
     /**
      * @inheritdoc
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%cacheflag_flags}}';
     }

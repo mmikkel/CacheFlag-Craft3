@@ -11,8 +11,8 @@ namespace mmikkel\cacheflag\services;
 use Craft;
 use craft\base\Component;
 use craft\helpers\StringHelper;
-use craft\services\TemplateCaches;
 use yii\caching\TagDependency;
+
 use DateTime;
 
 /**
@@ -173,6 +173,7 @@ class TemplateCachesService extends Component
      * Returns the current request path, including a "site:" or "cp:" prefix.
      *
      * @return string
+     * @throws \yii\base\InvalidConfigException
      */
     private function _path(): string
     {

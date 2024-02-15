@@ -1,46 +1,36 @@
 <?php
-/**
- * Cache Flag plugin for Craft CMS 3.x
- *
- * Flag and clear template caches.
- *
- * @link      https://vaersaagod.no
- * @copyright Copyright (c) 2018 Mats Mikkel Rummelhoff
- */
 
 namespace mmikkel\cacheflag;
 
 use Craft;
 use craft\base\Element;
+use craft\base\ElementActionInterface;
 use craft\base\ElementInterface;
 use craft\base\Plugin;
-use craft\console\Application as ConsoleApplication;
 use craft\elements\actions\SetStatus;
+use craft\elements\db\ElementQueryInterface;
 use craft\events\ElementEvent;
 use craft\events\ElementActionEvent;
-use craft\events\MergeElementsEvent;
 use craft\events\MoveElementEvent;
 use craft\events\PluginEvent;
 use craft\events\RegisterCacheOptionsEvent;
-use craft\events\TemplateEvent;
+use craft\events\RegisterComponentTypesEvent;
 use craft\helpers\ElementHelper;
 use craft\services\Elements;
 use craft\services\Plugins;
 use craft\services\ProjectConfig;
 use craft\services\Structures;
+use craft\services\Utilities;
 use craft\utilities\ClearCaches;
-use craft\web\UrlManager;
 use craft\web\twig\variables\CraftVariable;
-use craft\web\View;
 
+use mmikkel\cacheflag\utilities\CacheFlagUtility;
 use yii\base\Event;
-use yii\base\InvalidConfigException;
 
 use mmikkel\cacheflag\services\CacheFlagService;
 use mmikkel\cacheflag\services\ProjectConfig as CacheFlagProjectConfigService;
 use mmikkel\cacheflag\services\TemplateCachesService;
 use mmikkel\cacheflag\twigextensions\Extension as CacheFlagTwigExtension;
-use mmikkel\cacheflag\variables\CpVariable;
 
 /**
  * Class CacheFlag
@@ -55,24 +45,20 @@ use mmikkel\cacheflag\variables\CpVariable;
  */
 class CacheFlag extends Plugin
 {
-    // Static Properties
-    // =========================================================================
 
-    /**
-     * @var CacheFlag
-     */
-    public static $plugin;
+    /** @var string */
+    public string $schemaVersion = '1.0.2';
 
-    // Public Methods
-    // =========================================================================
+    /** @var bool */
+    public bool $hasCpSection = false;
 
-    /**
-     * @inheritdoc
-     */
-    public function init()
+    /** @var bool */
+    public bool $hasCpSettings = false;
+
+    /** @inheritdoc */
+    public function init(): void
     {
         parent::init();
-        self::$plugin = $this;
 
         // Register services
         $this->setComponents([
@@ -81,9 +67,8 @@ class CacheFlag extends Plugin
             'templateCaches' => TemplateCachesService::class,
         ]);
 
-        $this->initProjectConfig();
-
-        $this->addElementEventListeners();
+        $this->_initProjectConfig();
+        $this->_addElementEventListeners();
 
         // Register custom Twig extension
         Craft::$app->getView()->registerTwigExtension(new CacheFlagTwigExtension());
@@ -100,37 +85,21 @@ class CacheFlag extends Plugin
             }
         );
 
-        // Register CP variable
+        // Register utility
         Event::on(
-            CraftVariable::class,
-            CraftVariable::EVENT_INIT,
-            function (Event $event) {
-                /** @var CraftVariable $variable */
-                $variable = $event->sender;
-                $variable->set('cacheFlagCp', CpVariable::class);
+            Utilities::class,
+            Utilities::EVENT_REGISTER_UTILITIES,
+            static function(RegisterComponentTypesEvent $event) {
+                $event->types[] = CacheFlagUtility::class;
             }
         );
 
-        Craft::info(
-            Craft::t(
-                'cache-flag',
-                '{name} plugin loaded',
-                ['name' => $this->name]
-            ),
-            __METHOD__
-        );
-    }
-
-    /** @inheritDoc */
-    public function getCpNavItem(): ?array
-    {
-        return parent::getCpNavItem();
     }
 
     /**
-     *
+     * @return void
      */
-    protected function initProjectConfig()
+    private function _initProjectConfig(): void
     {
         Event::on(
             ProjectConfig::class,
@@ -156,9 +125,9 @@ class CacheFlag extends Plugin
     }
 
     /**
-     *
+     * @return void
      */
-    protected function addElementEventListeners()
+    private function _addElementEventListeners(): void
     {
         // Invalidate flagged caches when elements are saved
         Event::on(
@@ -195,13 +164,13 @@ class CacheFlag extends Plugin
 
                 /* @var ElementActionInterface|null $action */
                 $action = $event->action;
-                if ($action === null || \get_class($action) !== SetStatus::class) {
+                if (!$action instanceof SetStatus) {
                     return;
                 }
 
                 /* @var ElementQueryInterface|null $criteria */
                 $criteria = $event->criteria;
-                if ($criteria === null) {
+                if (empty($criteria)) {
                     return;
                 }
 
@@ -229,10 +198,10 @@ class CacheFlag extends Plugin
             if (ElementHelper::isDraftOrRevision($element)) {
                 return;
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // We don't care about handling this exception
         }
-        CacheFlag::$plugin->cacheFlag->invalidateFlaggedCachesByElement($element);
+        CacheFlag::getInstance()->cacheFlag->invalidateFlaggedCachesByElement($element);
     }
 
 }

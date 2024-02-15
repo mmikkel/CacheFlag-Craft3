@@ -22,15 +22,10 @@ use craft\elements\GlobalSet;
 use craft\elements\Tag;
 use craft\helpers\Db;
 use craft\helpers\StringHelper;
-use craft\helpers\UrlHelper;
 
 use yii\caching\TagDependency;
 
-use mmikkel\cacheflag\CacheFlag;
-use mmikkel\cacheflag\events\BeforeDeleteFlaggedTemplateCachesEvent;
-use mmikkel\cacheflag\events\AfterDeleteFlaggedTemplateCachesEvent;
 use mmikkel\cacheflag\events\FlaggedTemplateCachesEvent;
-use mmikkel\cacheflag\records\Flagged;
 use mmikkel\cacheflag\records\Flags;
 
 
@@ -53,18 +48,6 @@ class CacheFlagService extends Component
      * @event Event The event that is triggered after flagged template caches are invalidated.
      */
     const EVENT_AFTER_INVALIDATE_FLAGGED_CACHES = 'afterInvalidateFlaggedCaches';
-
-    /**
-     * @event Event The event that is triggered before flagged template caches are deleted.
-     * @deprecated since 1.1.0. Use [[\mmikkel\cacheflag\services\CacheFlagService::EVENT_BEFORE_INVALIDATE_FLAGGED_CACHES]] instead.
-     */
-    const EVENT_BEFORE_DELETE_FLAGGED_CACHES = 'beforeDeleteFlaggedCaches';
-
-    /**
-     * @event Event The event that is triggered after flagged template caches are deleted.
-     * @deprecated since 1.1.0. Use [[\mmikkel\cacheflag\services\CacheFlagService::EVENT_AFTER_INVALIDATE_FLAGGED_CACHES]] instead.
-     */
-    const EVENT_AFTER_DELETE_FLAGGED_CACHES = 'afterDeleteFlaggedCaches';
 
     // Public Methods
     // =========================================================================
@@ -108,8 +91,6 @@ class CacheFlagService extends Component
         if ($isNew) {
             $uid = StringHelper::UUID();
         }
-
-        $sourceKey = null;
 
         switch ($sourceColumn) {
             case 'sectionId':
@@ -158,8 +139,7 @@ class CacheFlagService extends Component
     /**
      * @param string $sourceColumn
      * @param string $sourceValue
-     * @throws \Throwable
-     * @throws \yii\db\Exception
+     * @return false|void
      */
     public function deleteFlagsBySource(string $sourceColumn, string $sourceValue)
     {
@@ -194,17 +174,6 @@ class CacheFlagService extends Component
     public function invalidateAllFlaggedCaches()
     {
         TagDependency::invalidate(Craft::$app->getCache(), 'cacheflag');
-    }
-
-    /**
-     * @return bool
-     * @deprecated since 1.1.0. Use [[\mmikkel\cacheflag\services\CacheFlagService::invalidateAllFlaggedCaches()]] instead.
-     */
-    public function deleteAllFlaggedCaches(): bool
-    {
-        Craft::$app->getDeprecator()->log('CacheFlagService::deleteAllFlaggedCaches()', 'deleteAllFlaggedCaches() has been deprecated. Use \mmikkel\cacheflag\services\CacheFlagService::invalidateAllFlaggedCaches() instead.');
-        $this->invalidateAllFlaggedCaches();
-        return true;
     }
 
     /**
@@ -284,17 +253,6 @@ class CacheFlagService extends Component
     }
 
     /**
-     * @param Element $element
-     * @return bool
-     * @deprecated since 1.1.0. Use [[\mmikkel\cacheflag\services\CacheFlagService::invalidateFlaggedCachesByElement()]] instead.
-     */
-    public function deleteFlaggedCachesByElement(Element $element): bool
-    {
-        Craft::$app->getDeprecator()->log('CacheFlagService::deleteFlaggedCachesByElement()', 'deleteFlaggedCachesByElement() has been deprecated. Use \mmikkel\cacheflag\services\CacheFlagService::invalidateFlaggedCachesByElement() instead.');
-        return $this->invalidateFlaggedCachesByElement($element);
-    }
-
-    /**
      * @param string|string[]|null $flags
      * @return bool
      */
@@ -338,17 +296,6 @@ class CacheFlagService extends Component
         }
 
         return true;
-    }
-
-    /**
-     * @param string|string[] $flags
-     * @return bool
-     * @deprecated since 1.1.0. Use [[\mmikkel\cacheflag\services\CacheFlagService::invalidateFlaggedCachesByFlags()]] instead.
-     */
-    public function deleteFlaggedCachesByFlags($flags): bool
-    {
-        Craft::$app->getDeprecator()->log('CacheFlagService::deleteFlaggedCachesByFlags()', 'deleteFlaggedCachesByFlags() has been deprecated. Use \mmikkel\cacheflag\services\CacheFlagService::invalidateFlaggedCachesByFlags() instead.');
-        return $this->invalidateFlaggedCachesByFlags($flags);
     }
 
     /*
