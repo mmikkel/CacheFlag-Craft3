@@ -42,7 +42,7 @@ class DefaultController extends Controller
 
         foreach ($cacheFlags as $source => $flags) {
 
-            $sourceArray = \explode(':', $source);
+            $sourceArray = explode(':', $source);
             $sourceColumn = $sourceArray[0] ?? null;
             $sourceId = $sourceArray[1] ?? null;
 
@@ -50,7 +50,7 @@ class DefaultController extends Controller
                 continue;
             }
 
-            $flags = \preg_replace('/\s+/', '', $flags);
+            $flags = preg_replace('/\s+/', '', $flags);
 
             try {
                 if (!$flags) {

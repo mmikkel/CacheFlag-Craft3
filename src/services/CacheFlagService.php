@@ -1,18 +1,10 @@
 <?php
-/**
- * Cache Flag plugin for Craft CMS 3.x
- *
- * Flag and clear template caches.
- *
- * @link      https://vaersaagod.no
- * @copyright Copyright (c) 2018 Mats Mikkel Rummelhoff
- */
 
 namespace mmikkel\cacheflag\services;
 
 use Craft;
 use craft\base\Component;
-use craft\base\Element;
+use craft\base\ElementInterface;
 use craft\db\Query;
 use craft\db\Table;
 use craft\elements\Asset;
@@ -37,8 +29,6 @@ use mmikkel\cacheflag\records\Flags;
 class CacheFlagService extends Component
 {
 
-    // Constants
-    // =========================================================================
     /**
      * @event Event The event that is triggered before flagged template caches are deleted.
      */
@@ -48,9 +38,6 @@ class CacheFlagService extends Component
      * @event Event The event that is triggered after flagged template caches are invalidated.
      */
     const EVENT_AFTER_INVALIDATE_FLAGGED_CACHES = 'afterInvalidateFlaggedCaches';
-
-    // Public Methods
-    // =========================================================================
 
     /**
      * @return array
@@ -160,15 +147,6 @@ class CacheFlagService extends Component
     }
 
     /**
-     * @return bool
-     * @deprecated since 1.1.0
-     */
-    public function flagsHasCaches(): bool
-    {
-        return true;
-    }
-
-    /**
      * Invalidate all flagged template caches
      */
     public function invalidateAllFlaggedCaches()
@@ -177,10 +155,10 @@ class CacheFlagService extends Component
     }
 
     /**
-     * @param Element $element
+     * @param ElementInterface $element
      * @return bool
      */
-    public function invalidateFlaggedCachesByElement(Element $element): bool
+    public function invalidateFlaggedCachesByElement(ElementInterface $element): bool
     {
         // Collect all flags for this element
         $query = (new Query())
@@ -256,20 +234,20 @@ class CacheFlagService extends Component
      * @param string|string[]|null $flags
      * @return bool
      */
-    public function invalidateFlaggedCachesByFlags($flags): bool
+    public function invalidateFlaggedCachesByFlags(string|array|null $flags): bool
     {
 
-        if (!$flags) {
+        if (empty($flags)) {
             return false;
         }
 
-        if (\is_array($flags)) {
+        if (is_array($flags)) {
             $flags = $this->implodeFlagsArray($flags);
         } else {
-            $flags = \preg_replace('/\s+/', '', $flags);
+            $flags = preg_replace('/\s+/', '', $flags);
         }
 
-        $flags = \array_values(\array_unique(\explode(',', $flags)));
+        $flags = array_values(\array_unique(\explode(',', $flags)));
 
         if (empty($flags)) {
             return false;
@@ -282,7 +260,7 @@ class CacheFlagService extends Component
             ]));
         }
 
-        $flagTags = \array_map(function (string $flag) {
+        $flagTags = array_map(function (string $flag) {
             return "cacheflag::$flag";
         }, $flags);
 
@@ -298,9 +276,6 @@ class CacheFlagService extends Component
         return true;
     }
 
-    /*
-     * Protected methods
-     */
     /**
      * @param array $flagsArray
      * @return string
@@ -311,15 +286,13 @@ class CacheFlagService extends Component
         $flags = '';
 
         foreach ($flagsArray as $item) {
-            if (\is_array($item)) {
+            if (is_array($item)) {
                 $flags .= "{$this->implodeFlagsArray($item)},";
             } else {
-                $flags .= \preg_replace('/\s+/', '', $item) . ',';
+                $flags .= preg_replace('/\s+/', '', $item) . ',';
             }
         }
 
-        $flags = \substr($flags, 0, 0 - strlen(','));
-
-        return $flags;
+        return substr($flags, 0, 0 - strlen(','));
     }
 }

@@ -22,15 +22,14 @@ use craft\services\ProjectConfig;
 use craft\services\Structures;
 use craft\services\Utilities;
 use craft\utilities\ClearCaches;
-use craft\web\twig\variables\CraftVariable;
 
-use mmikkel\cacheflag\utilities\CacheFlagUtility;
 use yii\base\Event;
 
 use mmikkel\cacheflag\services\CacheFlagService;
 use mmikkel\cacheflag\services\ProjectConfig as CacheFlagProjectConfigService;
 use mmikkel\cacheflag\services\TemplateCachesService;
 use mmikkel\cacheflag\twigextensions\Extension as CacheFlagTwigExtension;
+use mmikkel\cacheflag\utilities\CacheFlagUtility;
 
 /**
  * Class CacheFlag
@@ -184,13 +183,11 @@ class CacheFlag extends Plugin
     }
 
     /**
-     * @param ElementInterface|Element|null $element
+     * @param ElementInterface|null $element
+     * @return void
      */
-    private function _maybeInvalidateFlaggedCachesByElement($element)
+    private function _maybeInvalidateFlaggedCachesByElement(?ElementInterface $element): void
     {
-        if (!$element instanceof ElementInterface) {
-            return;
-        }
         /** @var Element $element */
         // This try/catch is introduced to mitigate an edge case where a nested element could have an invalid (deleted) owner ID.
         // See https://github.com/mmikkel/CacheFlag-Craft3/issues/21

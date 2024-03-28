@@ -26,29 +26,12 @@ However, Cache Flag is still a valid alternative to the native `{% cache %}` tag
 * [Cold caches](#cold-caches)  
 * [Invalidating flagged caches](#invalidating-flagged-caches)
 * [Additional parameters](#additional-parameters)
-* [Project Config](#project-config)  
-* [Upgrading from Craft 2](#upgrading-from-craft-2)  
+* [Project Config](#project-config)
 * [Events](#events)  
 
 ## Requirements and installation
 
-**This plugin requires Craft CMS 3.7.0, 4.0.0-beta.4 or later.**  
-
-Craft installs using Craft CMS 3.4.x or below should install Cache Flag v. 1.0.4:** `composer require mmikkel/cache-flag:1.0.4`  
-
-To install the plugin, follow these instructions:
-
-1. Open your terminal and go to your Craft project:
-
-        cd /path/to/project
-
-2. Then tell Composer to load the plugin:
-
-        composer require mmikkel/cache-flag
-
-3. In the Control Panel, go to Settings → Plugins and click the “Install” button for Cache Flag, or install via the Craft CLI:  
-
-        ./craft plugin/install cache-flag
+**This plugin requires Craft CMS 5.0+**  
 
 ## Using Cache Flag  
 
@@ -71,9 +54,9 @@ _Here's how it looks in action:_
 
 ### I'm going to need an example.  
 
-Sure. Let's assume you have a section called "News", and there's a cache that you want to invalidate whenever the content in that section changes (i.e. if entries are saved, deleted, changes status etc). First, you add the flag `news` (or whatever, the flags can be anything, really) to the "News" section in Cache Flag's CP section: 
+Sure. Let's assume you have a section called "News", and there's a cache that you want to invalidate whenever the content in that section changes (i.e. if entries are saved, deleted, changes status etc). First, you add the flag `news` (or whatever, the flags can be anything, really) to the "News" section in Cache Flag's CP utility: 
 
-![The Cache Flag CP section](resources/cpsection.png)  
+![The Cache Flag CP utility](resources/utility.png)
 
 Then, you add that same `news` flag to any relevant caches, using the `{% cacheflag %}` tag and the `flagged` parameter:  
 
@@ -169,7 +152,7 @@ If both `flagged` and `with elements` are omitted from a `{% cacheflag %}` tag, 
 
 ## Invalidating flagged caches
 
-Cache Flag will automatically invalidate any caches with flags saved to one or multiple element sources in Cache Flag's CP section, and caches using [dynamic flags](#dynamic-flags). These caches are invalidated whenever relevant elements are saved, deleted, moved or changes status.  
+Cache Flag will automatically invalidate any caches with flags saved to one or multiple element sources defined in Cache Flag's CP utility, and caches using [dynamic flags](#dynamic-flags). These caches are invalidated whenever relevant elements are saved, deleted, moved or changes status.  
 
 Cold caches and caches using [arbitrary flags](#arbitrary-flags) must be invalidated manually or programmatically (see below).  
 
@@ -178,7 +161,7 @@ Cold caches and caches using [arbitrary flags](#arbitrary-flags) must be invalid
 Flagged template caches can be manually invalidated by  
 
 * Using the native Clear Caches utility in the Craft CP (check out the [CP Clear Cache plugin](https://plugins.craftcms.com/cp-clearcache) for easier access to this tool)  
-* Hitting the "Invalidate all flagged caches" button in Cache Flag's CP section (only available if `allowAdminChanges` is `true`, see [more info here](#project-config))  
+* Clicking the "Invalidate all flagged caches" button in Cache Flag's CP utility    
 * Using the native CLI command `invalidate-tags/cacheflag`  
 * Using the native CLI command `invalidate-tags/template` (invalidates all template caches, including flagged ones)  
 * Using the native CLI command `invalidate-tags/all` (invalidates all caches, including template caches)  
@@ -215,19 +198,6 @@ Beyond the `flagged` and `with elements` parameters, the `{% cacheflag %}` tag _
 ## Project Config and `allowAdminChanges`
 
 Cache Flag supports [Project Config](https://docs.craftcms.com/v3/project-config.html) since v. 1.2.0 (Craft 3.5.0 or later only). **If you're upgrading from an earlier version of Cache Flag, the relevant `.yaml` files will be automatically created after upgrading and running migrations.**  
-
-Note that Cache Flag's CP section is inaccessible in environments where the  [`allowAdminChanges`](https://docs.craftcms.com/v3/config/config-settings.html#allowadminchanges) config setting is set to `false`.  
-
-## Upgrading from Craft 2
-
-Cache Flag will attempt to automatically migrate flags from the old `templatecaches_flagged` Craft 2 database table after installation (or, after upgrading from an earlier version of Cache Flag for Craft 3).** 
-
-The migration only runs if    
-
-1. The old Craft 2 database table `templatecaches_flagged` is still in the database  
-2. The new Craft 3 database table (`cacheflag_flags`) has no rows  
-
-After the migration has completed, make sure that all flags have carried over. Any missing flags will have to be manually entered in Cache Flag's CP section (this can happen if there isn't parity between element source IDs in the Craft 2/3 database tables).    
 
 ## Events
 

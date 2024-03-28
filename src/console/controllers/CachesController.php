@@ -25,8 +25,8 @@ class CachesController extends Controller
     public function actionInvalidate(string $flags = '')
     {
 
-        $flags = \preg_replace('/\s+/', '', $flags);
-        $flags = \array_unique(\array_filter(\explode(',', $flags)));
+        $flags = preg_replace('/\s+/', '', $flags);
+        $flags = array_unique(array_filter(explode(',', $flags)));
 
         if (empty($flags)) {
             CacheFlag::getInstance()->cacheFlag->invalidateAllFlaggedCaches();
