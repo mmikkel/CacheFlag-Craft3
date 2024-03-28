@@ -198,7 +198,7 @@ class CacheFlag extends Plugin
         } catch (\Throwable) {
             // We don't care about handling this exception
         }
-        CacheFlag::getInstance()->cacheFlag->invalidateFlaggedCachesByElement($element);
+        $this->cacheFlag->invalidateFlaggedCachesByElement($element);
     }
 
 }

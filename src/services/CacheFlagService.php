@@ -51,21 +51,21 @@ class CacheFlagService extends Component
     }
 
     /**
-     * @param string|string[] $flags
+     * @param string|string[]|null $flags
      * @param string $sourceColumn
      * @param string $sourceValue
      * @throws \Throwable
      * @throws \yii\db\Exception
      */
-    public function saveFlags($flags, string $sourceColumn, string $sourceValue)
+    public function saveFlags(string|array|null $flags, string $sourceColumn, string $sourceValue): void
     {
 
-        if (!$flags) {
+        if (empty($flags)) {
             return;
         }
 
-        if (\is_array($flags)) {
-            $flags = \implode(',', $flags);
+        if (is_array($flags)) {
+            $flags = implode(',', $flags);
         }
 
         $uid = (new Query())
