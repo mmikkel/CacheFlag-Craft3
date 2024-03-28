@@ -14,11 +14,11 @@ However, Cache Flag is still a valid alternative to the native `{% cache %}` tag
 
 * Implement automatic or manual bulk template cache invalidation (optionally, in combination with Craft's native element-based cache invalidation)  
 * Cache arbitrary HTML output and implement your own invalidation strategies for it  
-* Have completely cold template caches (like the [Cold Cache plugin](https://github.com/pixelandtonic/ColdCache), which is not available for Craft 3 or 4)  
+* Have completely cold template caches (like the [Cold Cache plugin](https://github.com/pixelandtonic/ColdCache), which is not available for Craft 5)  
 
 ## Table of contents  
 
-* [Requirements and installation](#requirements-and-installation)  
+* [Requirements](#requirements)  
 * [Using Cache Flag](#using-cache-flag)  
 * [Dynamic flags](#dynamic-flags)  
 * [Arbitrary flags](#arbitrary-flags)  
@@ -29,7 +29,7 @@ However, Cache Flag is still a valid alternative to the native `{% cache %}` tag
 * [Project Config](#project-config)
 * [Events](#events)  
 
-## Requirements and installation
+## Requirements
 
 **This plugin requires Craft CMS 5.0+**  
 
