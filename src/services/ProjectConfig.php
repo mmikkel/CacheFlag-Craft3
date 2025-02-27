@@ -107,27 +107,27 @@ class ProjectConfig extends Component
 
     /**
      * @param ConfigEvent $event
-     * @throws \yii\db\Exception
+     * @return void
      */
     public function onProjectConfigDelete(ConfigEvent $event)
     {
 
         $uid = $event->tokenMatches[0];
 
-        $id = (new Query())
-            ->select(['id'])
-            ->from(Flags::tableName())
-            ->where(['uid' => $uid])
-            ->scalar();
-
-        if (!$id) {
-            return;
+        try {
+            $id = (new Query())
+                ->select(['id'])
+                ->from(Flags::tableName())
+                ->where(['uid' => $uid])
+                ->scalar();
+            if ($id) {
+                Craft::$app->db->createCommand()
+                    ->delete(Flags::tableName(), ['id' => $id])
+                    ->execute();
+            }
+        } catch (\Throwable $e) {
+            Craft::error($e, __METHOD__);
         }
-
-        Craft::$app->db->createCommand()
-            ->delete(Flags::tableName(), ['id' => $id])
-            ->execute();
-
     }
 
     /**

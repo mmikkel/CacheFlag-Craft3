@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.0.1 - 2025-02-27
+### Fixed
+- Fixed a PDO exception that could occur when applying project config changes after uninstalling Cache Flag
+
 ## 2.0.0 - 2024-03-28
 
 ### Added
