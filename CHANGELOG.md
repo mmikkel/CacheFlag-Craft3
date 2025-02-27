@@ -1,5 +1,9 @@
 # Cache Flag Changelog
 
+## 1.4.1 - 2025-02-27
+### Fixed
+- Fixed a PDO exception that could occur when applying project config changes after uninstalling Cache Flag
+
 ## 1.4.0 - 2023-07-04
 ### Changed
 - The Cache Flag CP section is now available in environments where admin changes are disallowed (saving flags isn't possible unless `allowAdminChanges` is set to `true`, but invalidating flagged caches is)  
