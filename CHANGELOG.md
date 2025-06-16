@@ -1,5 +1,9 @@
 # Cache Flag Changelog
 
+## 1.4.2 - 2025-06-16
+### Fixed
+- Fixed a bug where CacheFlag would cache content for preview and tokenised requests
+
 ## 1.4.1 - 2025-02-27
 ### Fixed
 - Fixed a PDO exception that could occur when applying project config changes after uninstalling Cache Flag
