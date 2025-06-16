@@ -27,6 +27,12 @@ class TemplateCachesService extends Component
     /** @var bool */
     private $_collectElementTags = false;
 
+    /** @var bool */
+    private bool $_enabled;
+
+    /** @var bool */
+    private bool $_enabledGlobally;
+
     /**
      * @var string|null The current request's path
      * @see _path()
@@ -47,7 +53,7 @@ class TemplateCachesService extends Component
     public function getTemplateCache(string $key, $flags, bool $collectElementTags, bool $global)
     {
         // Make sure template caching is enabled
-        if ($this->_isTemplateCachingEnabled() === false) {
+        if ($this->_isTemplateCachingEnabled($global) === false) {
             return null;
         }
 
@@ -80,10 +86,10 @@ class TemplateCachesService extends Component
     /**
      *
      */
-    public function startTemplateCache()
+    public function startTemplateCache(bool $global = false)
     {
         // Make sure template caching is enabled
-        if ($this->_isTemplateCachingEnabled() === false) {
+        if ($this->_isTemplateCachingEnabled($global) === false) {
             return;
         }
 
@@ -107,7 +113,7 @@ class TemplateCachesService extends Component
     {
 
         // Make sure template caching is enabled
-        if ($this->_isTemplateCachingEnabled() === false) {
+        if ($this->_isTemplateCachingEnabled($global) === false) {
             return;
         }
 
@@ -147,9 +153,23 @@ class TemplateCachesService extends Component
      *
      * @return bool Whether template caching is enabled
      */
-    private function _isTemplateCachingEnabled(): bool
+    private function _isTemplateCachingEnabled(bool $global): bool
     {
-        return !!Craft::$app->getConfig()->getGeneral()->enableTemplateCaching;
+        if (!isset($this->_enabled)) {
+            if (!Craft::$app->getConfig()->getGeneral()->enableTemplateCaching) {
+                $this->_enabled = $this->_enabledGlobally = false;
+            } else {
+                // Don't enable template caches for Live Preview/tokenized requests
+                $request = Craft::$app->getRequest();
+                if ($request->getIsPreview() || $request->getHadToken()) {
+                    $this->_enabled = $this->_enabledGlobally = false;
+                } else {
+                    $this->_enabled = !$request->getIsConsoleRequest();
+                    $this->_enabledGlobally = true;
+                }
+            }
+        }
+        return $global ? $this->_enabledGlobally : $this->_enabled;
     }
 
     /**
