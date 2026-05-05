@@ -24,7 +24,7 @@ class ProjectConfig extends Component
      * @param ConfigEvent $event
      * @throws \yii\db\Exception
      */
-    public function onProjectConfigChange(ConfigEvent $event)
+    public function onProjectConfigChange(ConfigEvent $event): void
     {
 
         $uid = $event->tokenMatches[0];
@@ -34,38 +34,38 @@ class ProjectConfig extends Component
             ->from(Flags::tableName())
             ->where(['uid' => $uid]);
 
-        $source = \explode(':', $event->newValue['source']);
+        $source = explode(':', $event->newValue['source']);
         $sourceKey = $source[0] ?? null;
         $sourceValue = $source[1] ?? null;
 
-        if (!$sourceKey || !$sourceValue) {
+        if (empty($sourceKey) || empty($sourceValue)) {
             return;
         }
 
         switch ($sourceKey) {
             case 'section':
                 $column = 'sectionId';
-                $value = (int)Db::idByUid(Table::SECTIONS, $sourceValue);
+                $value = Db::idByUid(Table::SECTIONS, $sourceValue);
                 break;
             case 'categoryGroup':
                 $column = 'categoryGroupId';
-                $value = (int)Db::idByUid(Table::CATEGORYGROUPS, $sourceValue);
+                $value = Db::idByUid(Table::CATEGORYGROUPS, $sourceValue);
                 break;
             case 'tagGroup':
                 $column = 'tagGroupId';
-                $value = (int)Db::idByUid(Table::TAGGROUPS, $sourceValue);
+                $value = Db::idByUid(Table::TAGGROUPS, $sourceValue);
                 break;
             case 'userGroup':
                 $column = 'userGroupId';
-                $value = (int)Db::idByUid(Table::USERGROUPS, $sourceValue);
+                $value = Db::idByUid(Table::USERGROUPS, $sourceValue);
                 break;
             case 'volume':
                 $column = 'volumeId';
-                $value = (int)Db::idByUid(Table::VOLUMES, $sourceValue);
+                $value = Db::idByUid(Table::VOLUMES, $sourceValue);
                 break;
             case 'globalSet':
                 $column = 'globalSetId';
-                $value = (int)Db::idByUid(Table::GLOBALSETS, $sourceValue);
+                $value = Db::idByUid(Table::GLOBALSETS, $sourceValue);
                 break;
             case 'elementType':
                 $column = 'elementType';
@@ -73,6 +73,11 @@ class ProjectConfig extends Component
                 break;
             default:
                 return;
+        }
+
+        if ($value === null) {
+            Craft::$app->getProjectConfig()->defer($event, [$this, __FUNCTION__]);
+            return;
         }
 
         $query->orWhere([$column => $value]);
