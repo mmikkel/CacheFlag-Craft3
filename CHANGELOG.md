@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+- Fixed an issue where re-ordering structure entries did not break Cache Flag's caches, on Craft 5.9.0+. [#29](https://github.com/mmikkel/CacheFlag-Craft3/issues/29)
+
 ## 2.0.3 - 2026-05-05
 ### Fixed
 - Fixed a PDO exception that could occur when installing Craft with pre-existing cache flags in the project config YAML files. [#28](https://github.com/mmikkel/CacheFlag-Craft3/issues/28)

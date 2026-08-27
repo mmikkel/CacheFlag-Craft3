@@ -88,7 +88,7 @@ class CacheFlag extends Plugin
         Event::on(
             Utilities::class,
             Utilities::EVENT_REGISTER_UTILITIES,
-            static function(RegisterComponentTypesEvent $event) {
+            static function (RegisterComponentTypesEvent $event) {
                 $event->types[] = CacheFlagUtility::class;
             }
         );
@@ -147,13 +147,23 @@ class CacheFlag extends Plugin
         );
 
         // Invalidate flagged caches when structure entries are moved
-        Event::on(
-            Structures::class,
-            Structures::EVENT_AFTER_MOVE_ELEMENT,
-            function (MoveElementEvent $event) {
-                $this->_maybeInvalidateFlaggedCachesByElement($event->element);
-            }
-        );
+        // Craft 5.9.0 deprecated the Structures::EVENT_AFTER_MOVE_ELEMENT event, and it no longer works
+        // If/when we bump Cache Flag's Craft dependency, we can remove this conditional and just use Structures::EVENT_AFTER_UPDATE_ELEMENT directly
+        $structureMoveEvent = null;
+        if (defined(Structures::class . '::EVENT_AFTER_UPDATE_ELEMENT')) {
+            $structureMoveEvent = Structures::EVENT_AFTER_UPDATE_ELEMENT;
+        } else if (defined(Structures::class . '::EVENT_AFTER_MOVE_ELEMENT')) {
+            $structureMoveEvent = Structures::EVENT_AFTER_MOVE_ELEMENT;
+        }
+        if ($structureMoveEvent) {
+            Event::on(
+                Structures::class,
+                $structureMoveEvent,
+                function (MoveElementEvent $event) {
+                    $this->_maybeInvalidateFlaggedCachesByElement($event->element);
+                }
+            );
+        }
 
         // Invalidate flagged caches when elements change status
         Event::on(
