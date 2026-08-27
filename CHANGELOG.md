@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 2.0.4 - 2026-08-27
 ### Fixed
 - Fixed an issue where re-ordering structure entries did not break Cache Flag's caches, on Craft 5.9.0+. [#29](https://github.com/mmikkel/CacheFlag-Craft3/issues/29)
 
